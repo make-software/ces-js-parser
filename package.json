@@ -1,0 +1,43 @@
+{
+  "name": "ces-js-parser",
+  "version": "1.0.0",
+  "description": "Parser for contract level events according to the Casper events standard",
+  "main": "dist/lib.node.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepare": "husky-run install",
+    "prepublishOnly": "npm run build && npm run test",
+    "lint": "eslint src/ --fix",
+    "lint:ci": "eslint src/ --max-warnings=0",
+    "prebuild": "npm run clean && npm run lint"
+  },
+  "author": "",
+  "license": "ISC",
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.{js,css,md}": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "dependencies": {
+    "@ethersproject/bignumber": "^5.7.0",
+    "@open-rpc/client-js": "^1.8.1",
+    "casper-js-sdk": "^2.11.0",
+    "ts-results": "^3.3.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-jsdoc": "^40.0.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^4.3.8"
+  }
+}
