@@ -100,18 +100,18 @@ Client that is implemented on top of a `CasperServiceByJsonRPC` client from `cas
 
 `fetchContractSchemasBytes` method that accepts contract hash and return bytes representation of stored schema:
 
-| Argument       | Type          | Description                             |
-| -------------- | ------------- | --------------------------------------- |
-| `contractHash` | `string` | Contract hash schema want to be fetched |
+| Argument         | Type     | Description                                                |
+| ---------------- | -------- | ---------------------------------------------------------- |
+| `contractHash`   | `string` | Contract hash schema want to be fetched                    |
 | `stateRootHash?` | `string` | State root hash of the data (takes latest if not provided) |
 
 #### `getContractSchemas`
 
 `getContractSchemas` method that accepts contract hashes to search event schemas for and returns a hash map `Record<string, ContractSchemas>` where `string` is a uref defined as a named key `__events` on a contract level and `ContractSchemas` is a structure that represents the information of a contract along with a events schemas of that contract defined according to the `CES` standard:
 
-| Argument       | Type          | Description                             |
-| -------------- | ------------- | --------------------------------------- |
-| `contractHash` | `string[]` | Contract hashes to search for schemas for  |
+| Argument       | Type       | Description                               |
+| -------------- | ---------- | ----------------------------------------- |
+| `contractHash` | `string[]` | Contract hashes to search for schemas for |
 
 ### `parseSchemasFromBytes`
 

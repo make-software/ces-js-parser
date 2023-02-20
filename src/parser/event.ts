@@ -71,21 +71,17 @@ export function parseEventDataFromBytes(
   for (const item of schema) {
     const parser = matchByteParserByCLType(item.value).unwrap();
 
-    try {
-      const clValueWithRemainder = parser.fromBytesWithRemainder(
-        remainder,
-        item.value,
-      );
+    const clValueWithRemainder = parser.fromBytesWithRemainder(
+      remainder,
+      item.value,
+    );
 
-      if (!clValueWithRemainder.remainder) {
-        throw new Error('remainder is empty');
-      }
-
-      result[item.property] = clValueWithRemainder.result.unwrap();
-      remainder = clValueWithRemainder.remainder;
-    } catch (err) {
-      console.log({ err });
+    if (!clValueWithRemainder.remainder) {
+      throw new Error('remainder is empty');
     }
+
+    result[item.property] = clValueWithRemainder.result.unwrap();
+    remainder = clValueWithRemainder.remainder;
   }
 
   return result;
