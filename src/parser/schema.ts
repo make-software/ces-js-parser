@@ -41,7 +41,7 @@ export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
   return schemas;
 }
 
-function parseSchemaFromBytesWithRemainder(
+export function parseSchemaFromBytesWithRemainder(
   rawBytes: Uint8Array,
 ): WithRemainder<Schema> {
   const fieldsNumber = Buffer.from(rawBytes).readUInt32LE(0);

@@ -37,9 +37,7 @@ export class Parser {
     return Promise.resolve(new Parser(contractsSchemas));
   }
 
-  public async parseExecutionResult(
-    executionResult: ExecutionResult,
-  ): Promise<ParseResult[]> {
+  public parseExecutionResult(executionResult: ExecutionResult): ParseResult[] {
     if (!executionResult.Success) {
       throw new Error('failed deploy');
     }

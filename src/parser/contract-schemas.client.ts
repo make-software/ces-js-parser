@@ -1,4 +1,5 @@
 import { CasperServiceByJsonRPC, decodeBase16 } from 'casper-js-sdk';
+import { SafeEventEmitterProvider } from 'casper-js-sdk/dist/services/ProviderTransport';
 
 import {
   EVENTS_NAMED_KEY,
@@ -16,8 +17,8 @@ export interface ContractSchemas {
 }
 
 export class ContractSchemasClient extends CasperServiceByJsonRPC {
-  constructor(nodeUrl: string) {
-    super(nodeUrl);
+  constructor(provider: string | SafeEventEmitterProvider) {
+    super(provider);
   }
 
   public async fetchContractSchemasBytes(
