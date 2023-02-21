@@ -1,15 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { decodeBase16 } from 'casper-js-sdk';
-import { ContractSchemasClient } from '../parser/contract-schemas.client';
+import { CasperServiceByJsonRPC, decodeBase16 } from 'casper-js-sdk';
 import { Parser } from '../parser/parser';
 import { parseSchemasFromBytes } from '../parser/schema';
-
-const providerMock = () => ({
-  sendAsync: jest.fn(),
-  send: jest.fn(),
-});
 
 describe('Parser', () => {
   describe('parseExecutionResult', () => {
@@ -28,11 +22,9 @@ describe('Parser', () => {
 
       const schemas = parseSchemasFromBytes(decodeBase16(schemaHex));
 
-      const schemasClient: jest.MockedObjectDeep<ContractSchemasClient> =
-        new ContractSchemasClient(
-          providerMock(),
-        ) as jest.MockedObjectDeep<ContractSchemasClient>;
-      schemasClient.getContractsSchemas = jest.fn();
+      const rpcClient = new CasperServiceByJsonRPC('');
+
+      Parser['getContractsMetadata'] = jest.fn();
 
       const eventsUref =
         'uref-d2263e86f497f42e405d5d1390aa3c1a8bfc35f3699fdc3be806a5cfe139dac9-007';
@@ -40,7 +32,7 @@ describe('Parser', () => {
       const eventsSchemaUref =
         'uref-91d95cbeae8ce00c0ca678762cc99aed052adfcb3e279c7440f5241b1bdf27b2-007';
 
-      schemasClient.getContractsSchemas.mockResolvedValue({
+      (Parser as any)['getContractsMetadata'].mockResolvedValue({
         [eventsUref]: {
           schemas,
           contractHash,
@@ -50,7 +42,7 @@ describe('Parser', () => {
         },
       });
 
-      const parser = await Parser.initialise(schemasClient, [contractHashHex]);
+      const parser = await Parser.initialize(rpcClient, [contractHashHex]);
 
       const rawMintDeploy = fs.readFileSync(
         path.resolve(__dirname, './fixtures/deploys/voting_created.json'),
@@ -70,46 +62,46 @@ describe('Parser', () => {
       expect(events[0].event!.contractHash).toEqual(contractHash);
       expect(events[0].event!.contractPackageHash).toEqual(contractPackageHash);
 
-      expect(Object.keys(events[0].event!.data).length).toEqual(5);
+      expect(Object.keys(events[0].event!.data!).length).toEqual(5);
 
-      expect(events[0].event!.data.voter.value()).toBeDefined();
-      expect(events[0].event!.data.voting_id.value()).toBeDefined();
-      expect(events[0].event!.data.voting_type.value()).toBeDefined();
-      expect(events[0].event!.data.choice.value()).toBeDefined();
-      expect(events[0].event!.data.stake.value()).toBeDefined();
+      expect(events[0].event!.data!.voter.value()).toBeDefined();
+      expect(events[0].event!.data!.voting_id.value()).toBeDefined();
+      expect(events[0].event!.data!.voting_type.value()).toBeDefined();
+      expect(events[0].event!.data!.choice.value()).toBeDefined();
+      expect(events[0].event!.data!.stake.value()).toBeDefined();
 
       // SimpleVotingCreated
       expect(events[1].event!.name).toEqual('SimpleVotingCreated');
       expect(events[1].event!.contractHash).toEqual(contractHash);
       expect(events[1].event!.contractPackageHash).toEqual(contractPackageHash);
 
-      expect(Object.keys(events[1].event!.data).length).toEqual(12);
+      expect(Object.keys(events[1].event!.data!).length).toEqual(12);
 
-      expect(events[1].event!.data.document_hash.value()).toBeDefined();
-      expect(events[1].event!.data.creator.value()).toBeDefined();
-      expect(events[1].event!.data.stake.value()).toBeDefined();
-      expect(events[1].event!.data.voting_id.value()).toBeDefined();
+      expect(events[1].event!.data!.document_hash.value()).toBeDefined();
+      expect(events[1].event!.data!.creator.value()).toBeDefined();
+      expect(events[1].event!.data!.stake.value()).toBeDefined();
+      expect(events[1].event!.data!.voting_id.value()).toBeDefined();
       expect(
-        events[1].event!.data.config_informal_quorum.value(),
+        events[1].event!.data!.config_informal_quorum.value(),
       ).toBeDefined();
       expect(
-        events[1].event!.data.config_informal_voting_time.value(),
+        events[1].event!.data!.config_informal_voting_time.value(),
       ).toBeDefined();
-      expect(events[1].event!.data.config_formal_quorum.value()).toBeDefined();
+      expect(events[1].event!.data!.config_formal_quorum.value()).toBeDefined();
       expect(
-        events[1].event!.data.config_formal_voting_time.value(),
-      ).toBeDefined();
-      expect(
-        events[1].event!.data.config_total_onboarded.value(),
+        events[1].event!.data!.config_formal_voting_time.value(),
       ).toBeDefined();
       expect(
-        events[1].event!.data.config_double_time_between_votings.value(),
+        events[1].event!.data!.config_total_onboarded.value(),
       ).toBeDefined();
       expect(
-        events[1].event!.data.config_voting_clearness_delta.value(),
+        events[1].event!.data!.config_double_time_between_votings.value(),
       ).toBeDefined();
       expect(
-        events[1].event!.data.config_time_between_informal_and_formal_voting.value(),
+        events[1].event!.data!.config_voting_clearness_delta.value(),
+      ).toBeDefined();
+      expect(
+        events[1].event!.data!.config_time_between_informal_and_formal_voting.value(),
       ).toBeDefined();
     });
   });

@@ -1,18 +1,18 @@
-import { CLValue } from 'casper-js-sdk';
-import { WithRemainder } from '../casper/types';
+import { CLValue, decodeBase16 } from 'casper-js-sdk';
+import { WithRemainder } from './casper/types';
 
 import {
   matchByteParserByCLType,
   parseBytesWithRemainder,
-} from '../casper/utils';
+} from './casper/utils';
 import { Schema, Schemas } from './schema';
 
 const EVENT_PREFIX = 'event_';
 
 export interface Event {
   name: string;
-  contractHash?: Uint8Array;
-  contractPackageHash?: Uint8Array;
+  contractHash: Uint8Array | null;
+  contractPackageHash: Uint8Array | null;
   data: Record<string, CLValue>;
 }
 
@@ -37,14 +37,20 @@ export function parseEventNameWithRemainder(
   };
 }
 
-export function parseEvent(rawEvent: Uint8Array, schemas: Schemas): Event {
-  if (rawEvent.length < 4) {
+export function parseEventNameAndData(
+  rawEvent: string,
+  schemas: Schemas,
+): {
+  name: string;
+  data: Record<string, CLValue>;
+} {
+  const event = decodeBase16(rawEvent);
+
+  if (event.length < 4) {
     throw new Error('invalid event bytes');
   }
 
-  const eventNameWithRemainder = parseEventNameWithRemainder(
-    rawEvent.subarray(4),
-  );
+  const eventNameWithRemainder = parseEventNameWithRemainder(event.subarray(4));
 
   const eventSchema = schemas[eventNameWithRemainder.data];
   if (!eventSchema) {
@@ -54,15 +60,15 @@ export function parseEvent(rawEvent: Uint8Array, schemas: Schemas): Event {
   return {
     name: eventNameWithRemainder.data,
     data: parseEventDataFromBytes(
-      eventNameWithRemainder.remainder,
       eventSchema,
+      eventNameWithRemainder.remainder,
     ),
   };
 }
 
 export function parseEventDataFromBytes(
-  rawBytes: Uint8Array,
   schema: Schema,
+  rawBytes: Uint8Array,
 ): Record<string, CLValue> {
   const result: Record<string, CLValue> = {};
 

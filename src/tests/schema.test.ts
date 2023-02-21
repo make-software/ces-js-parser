@@ -5,7 +5,7 @@ import {
   CLKeyType,
   CLListType,
 } from 'casper-js-sdk';
-import { CLAnyType } from '../casper/cltype';
+import { CLAnyType } from '../parser/casper/cltype';
 import {
   parseSchemaFromBytesWithRemainder,
   parseSchemasFromBytes,

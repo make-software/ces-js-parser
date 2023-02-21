@@ -1,36 +1,50 @@
-import { CLValue, decodeBase16, encodeBase16 } from 'casper-js-sdk';
+import {
+  CasperServiceByJsonRPC,
+  decodeBase16,
+  encodeBase16,
+} from 'casper-js-sdk';
 import {
   parseBytesWithRemainder,
   parseCLValueFromBytesWithRemainder,
-} from '../casper/utils';
+} from './casper/utils';
 import {
   Event,
   parseEventDataFromBytes,
   parseEventNameWithRemainder,
 } from './event';
-import { ExecutionResult, RawCLValue, WithRemainder } from '../casper/types';
-import {
-  ContractSchemas,
-  ContractSchemasClient,
-} from './contract-schemas.client';
+import { ExecutionResult, RawCLValue, WithRemainder } from './casper/types';
+import { parseSchemasFromBytes, Schemas } from './schema';
+
+export interface ContractMetadata {
+  schemas: Schemas;
+  contractHash: Uint8Array;
+  contractPackageHash: Uint8Array;
+  eventsSchemaUref: string;
+  eventsUref: string;
+}
+
+export const EVENTS_SCHEMA_NAMED_KEY = '__events_schema';
+
+export const EVENTS_NAMED_KEY = '__events';
 
 const DICTIONARY_PREFIX = 'dictionary-';
 
 export interface ParseResult {
-  error?: string;
-  event?: Event;
+  error: string | null;
+  event: Event;
 }
 
 export class Parser {
   constructor(
-    private readonly contractsSchemas: Record<string, ContractSchemas>,
+    private readonly contractsSchemas: Record<string, ContractMetadata>,
   ) {}
 
-  static async initialise(
-    contractSchemasClient: ContractSchemasClient,
+  static async initialize(
+    rpcClient: CasperServiceByJsonRPC,
     contractHashes: string[],
   ): Promise<Parser> {
-    const contractsSchemas = await contractSchemasClient.getContractsSchemas(
+    const contractsSchemas = await Parser.getContractsMetadata(
+      rpcClient,
       contractHashes,
     );
 
@@ -76,55 +90,148 @@ export class Parser {
         continue;
       }
 
-      const urefBytesWithReminder = parseBytesWithRemainder(
+      const urefBytesWithRemainder = parseBytesWithRemainder(
         clValueWithRemainder.remainder,
       );
 
-      const uref = `uref-${encodeBase16(urefBytesWithReminder.data)}-007`;
+      const uref = `uref-${encodeBase16(urefBytesWithRemainder.data)}-007`;
+
+      const parsedEvent: Event = {
+        contractHash: null,
+        contractPackageHash: null,
+        name: eventNameWithRemainder.data,
+        data: {},
+      };
 
       const contractSchemas = this.contractsSchemas[uref];
       if (!contractSchemas) {
         results.push({
-          error: `invalid event uref for event name ${eventNameWithRemainder.data}`,
+          event: parsedEvent,
+          error: `invalid event uref`,
         });
 
         continue;
       }
+
+      parsedEvent.contractHash = contractSchemas.contractHash;
+      parsedEvent.contractPackageHash = contractSchemas.contractPackageHash;
 
       const eventSchema = contractSchemas.schemas[eventNameWithRemainder.data];
       if (!eventSchema) {
         results.push({
-          error: `event name '${eventNameWithRemainder.data}' not in schema`,
+          event: parsedEvent,
+          error: `event name not in schema`,
         });
 
         continue;
       }
 
-      let eventData: Record<string, CLValue> = {};
-
       try {
-        eventData = parseEventDataFromBytes(
-          eventNameWithRemainder.remainder,
+        parsedEvent.data = parseEventDataFromBytes(
           eventSchema,
+          eventNameWithRemainder.remainder,
         );
       } catch (err) {
         results.push({
-          error: `failed to parse event data bytes for event name '${eventNameWithRemainder.data}', err: ${err.message}`,
+          event: parsedEvent,
+          error: `failed to parse event data bytes, err: ${err.message}`,
         });
 
         continue;
       }
 
       results.push({
-        event: {
-          name: eventNameWithRemainder.data,
-          contractHash: contractSchemas.contractHash,
-          contractPackageHash: contractSchemas.contractPackageHash,
-          data: eventData,
-        },
+        event: parsedEvent,
+        error: null,
       });
     }
 
     return results;
   }
+
+  private static async getContractsMetadata(
+    rpcClient: CasperServiceByJsonRPC,
+    contractHashes: string[],
+  ): Promise<Record<string, ContractMetadata>> {
+    const contractsSchemas: Record<string, ContractMetadata> = {};
+
+    const stateRootHash = await rpcClient.getStateRootHash();
+
+    for (const contractHash of contractHashes) {
+      const contractData = (
+        await rpcClient.getBlockState(stateRootHash, `hash-${contractHash}`, [])
+      ).Contract;
+
+      if (!contractData) {
+        throw new Error('contract data not found');
+      }
+
+      let eventsSchemaUref = '',
+        eventsUref = '';
+      for (const namedKey of contractData.namedKeys) {
+        if (namedKey.name === EVENTS_SCHEMA_NAMED_KEY) {
+          eventsSchemaUref = namedKey.key;
+        } else if (namedKey.name === EVENTS_NAMED_KEY) {
+          eventsUref = namedKey.key;
+        }
+
+        if (eventsSchemaUref !== '' && eventsUref !== '') {
+          break;
+        }
+      }
+
+      if (!eventsSchemaUref) {
+        throw new Error(`no '${EVENTS_SCHEMA_NAMED_KEY}' uref found`);
+      }
+
+      if (!eventsUref) {
+        throw new Error(`no '${EVENTS_NAMED_KEY}' uref found`);
+      }
+
+      const schemaResponse = await rpcClient['client'].request({
+        method: 'state_get_item',
+        params: {
+          state_root_hash: stateRootHash,
+          key: eventsSchemaUref,
+          path: [],
+        },
+      });
+
+      const schemas = parseSchemasFromBytes(
+        decodeBase16(schemaResponse.stored_value.CLValue.bytes),
+      );
+
+      const contractPackageHash = contractData.contractPackageHash.replace(
+        'contract-package-wasm',
+        '',
+      );
+
+      contractsSchemas[eventsUref] = {
+        schemas,
+        contractHash: decodeBase16(contractHash),
+        contractPackageHash: decodeBase16(contractPackageHash),
+        eventsSchemaUref,
+        eventsUref,
+      };
+    }
+
+    return contractsSchemas;
+  }
+}
+
+export async function fetchContractSchemasBytes(
+  rpcClient: CasperServiceByJsonRPC,
+  contractHash: string,
+  stateRootHash: string,
+): Promise<Uint8Array> {
+  const schemaResponse = await rpcClient['client'].request({
+    method: 'state_get_item',
+    params: {
+      state_root_hash: stateRootHash,
+      key: `hash-${contractHash}`,
+      path: [EVENTS_SCHEMA_NAMED_KEY],
+    },
+  });
+
+  return decodeBase16(schemaResponse.stored_value.CLValue.bytes);
 }

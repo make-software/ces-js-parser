@@ -1,8 +1,9 @@
-export { Parser, ParseResult } from './parser/parser';
 export {
-  ContractSchemasClient,
-  ContractSchemas,
-} from './parser/contract-schemas.client';
+  Parser,
+  ParseResult,
+  ContractMetadata,
+  fetchContractSchemasBytes,
+} from './parser/parser';
 export { Schemas, Schema, parseSchemasFromBytes } from './parser/schema';
-export { Event } from './parser/event';
-export { ExecutionResult } from './casper/types';
+export { Event, parseEventNameAndData } from './parser/event';
+export { ExecutionResult } from './parser/casper/types';

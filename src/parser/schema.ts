@@ -1,6 +1,7 @@
-import { CLType } from 'casper-js-sdk';
-import { WithRemainder } from '../casper/types';
-import { matchBytesToCLType, parseBytesWithRemainder } from '../casper/utils';
+import { CasperServiceByJsonRPC, CLType, decodeBase16 } from 'casper-js-sdk';
+import { WithRemainder } from './casper/types';
+import { matchBytesToCLType, parseBytesWithRemainder } from './casper/utils';
+import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
 
 export type Schemas = Record<string, Schema>;
 
@@ -10,9 +11,6 @@ interface PropertyDefenition {
   property: string;
   value: CLType;
 }
-
-export const EVENTS_SCHEMA_NAMED_KEY = '__events_schema';
-export const EVENTS_NAMED_KEY = '__events';
 
 export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
   const schemasNumber = Buffer.from(rawSchemas).readUInt32LE(0);
@@ -78,4 +76,38 @@ export function parseSchemaFromBytesWithRemainder(
     data: schema,
     remainder,
   };
+}
+
+export async function fetchContractSchemasBytes(
+  rpcClient: CasperServiceByJsonRPC,
+  contractHash: string,
+  stateRootHash: string,
+): Promise<Uint8Array> {
+  const contractData = (
+    await rpcClient.getBlockState(stateRootHash, `hash-${contractHash}`, [])
+  ).Contract;
+
+  if (!contractData) {
+    throw new Error('contract data not found');
+  }
+
+  const eventsSchema = contractData.namedKeys.find(
+    el => el.name === EVENTS_SCHEMA_NAMED_KEY,
+  );
+  if (!eventsSchema) {
+    throw new Error(
+      `'${EVENTS_SCHEMA_NAMED_KEY}' uref not found for contract '${contractHash}'`,
+    );
+  }
+
+  const schemaResponse = await rpcClient['client'].request({
+    method: 'state_get_item',
+    params: {
+      state_root_hash: stateRootHash,
+      key: eventsSchema.key,
+      path: [],
+    },
+  });
+
+  return decodeBase16(schemaResponse.stored_value.CLValue.bytes);
 }

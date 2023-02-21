@@ -18,15 +18,15 @@ with `casper-js-sdk`:
 
 ```typescript
 (async () => {
-  const contractSchemasClient = new ContractSchemasClient(
+  const rpcClient = new CasperServiceByJsonRPC(
     `http://${process.env.NODE_ADDRESS}:7777/rpc`,
   );
 
-  const parser = await Parser.initialise(contractSchemasClient, [
+  const parser = await Parser.initialize(rpcClient, [
     '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
   ]);
 
-  const deploy = await contractSchemasClient.getDeployInfo('19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442');
+  const deploy = await rpcClient.getDeployInfo('19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442');
 
   const events = await parser.parseExecutionResult(
     deploy.execution_results[0].result as ExecutionResult,
@@ -38,20 +38,18 @@ with `casper-js-sdk`:
 
 ## API
 
-Go CES Parser provides several public types and functions:
+JS CES Parser provides several public types and functions:
 
 - [JS CES Parser](#js-ces-parser)
   - [Install](#install)
   - [Usage](#usage)
   - [API](#api)
     - [`Parser`](#parser)
-      - [`initialise`](#initialise)
+      - [`initialize`](#initialize)
       - [`parseExecutionResults`](#parseexecutionresults)
-    - [`ContractSchemasClient`](#contractschemasclient)
       - [`fetchContractSchemasBytes`](#fetchcontractschemasbytes)
-      - [`getContractSchemas`](#getcontractschemas)
     - [`parseSchemasFromBytes`](#parseschemasfrombytes)
-    - [`parseEvent`](#parseevent)
+    - [`parseEventNameAndData`](#parseeventnameanddata)
     - [`Event`](#event)
     - [`ParseResult`](#parseresult)
     - [`Schema`](#schema)
@@ -63,9 +61,9 @@ Go CES Parser provides several public types and functions:
 Parser that accepts a list of observed contracts and provides possibility to parse CES events out of deploy execution
 results
 
-#### `initialise`
+#### `initialize`
 
-`initialise` is a async factory function that accepts `ContractSchemasClient` and `contractHashes` array and initialised a `Parser` instance:
+`initialize` is a async factory function that accepts `ContractSchemasClient` and `contractHashes` array and initialized a `Parser` instance:
 
 | Argument                | Type                           | Description                                    |
 | ----------------------- | ------------------------------ | ---------------------------------------------- |
@@ -79,7 +77,7 @@ const contractSchemasClient = new ContractSchemasClient(
   `http://${process.env.NODE_ADDRESS}:7777/rpc`,
 );
 
-const parser = await Parser.initialise(contractSchemasClient, [
+const parser = await Parser.initialize(contractSchemasClient, [
   '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
 ]);
 ```
@@ -92,26 +90,14 @@ const parser = await Parser.initialise(contractSchemasClient, [
 | ------------------ | ------------------ | ------------------------ |
 | `executionResults` | `ExecutionResults` | Deploy execution results |
 
-### `ContractSchemasClient`
-
-Client that is implemented on top of a `CasperServiceByJsonRPC` client from `casper-js-sdk` and provides an interface to retrieve contract schemas
-
 #### `fetchContractSchemasBytes`
 
 `fetchContractSchemasBytes` method that accepts contract hash and return bytes representation of stored schema:
 
-| Argument         | Type     | Description                                                |
-| ---------------- | -------- | ---------------------------------------------------------- |
-| `contractHash`   | `string` | Contract hash schema want to be fetched                    |
-| `stateRootHash?` | `string` | State root hash of the data (takes latest if not provided) |
-
-#### `getContractSchemas`
-
-`getContractSchemas` method that accepts contract hashes to search event schemas for and returns a hash map `Record<string, ContractSchemas>` where `string` is a uref defined as a named key `__events` on a contract level and `ContractSchemas` is a structure that represents the information of a contract along with a events schemas of that contract defined according to the `CES` standard:
-
-| Argument       | Type       | Description                               |
-| -------------- | ---------- | ----------------------------------------- |
-| `contractHash` | `string[]` | Contract hashes to search for schemas for |
+| Argument        | Type     | Description                                                |
+| --------------- | -------- | ---------------------------------------------------------- |
+| `contractHash`  | `string` | Contract hash schema want to be fetched                    |
+| `stateRootHash` | `string` | State root hash of the data (takes latest if not provided) |
 
 ### `parseSchemasFromBytes`
 
@@ -122,14 +108,14 @@ returns `Schemas`:
 | ---------- | ------------ | -------------------------- |
 | `rawBytes` | `Uint8Array` | Raw contract schemas bytes |
 
-### `parseEvent`
+### `parseEventNameAndData`
 
 Function that accepts raw event bytes and contract event schemas and returns `Event`, that contains `name` and `data`:
 
-| Argument  | Type         | Description                  |
-| --------- | ------------ | ---------------------------- |
-| `event`   | `Uint8Array` | Raw event bytes in hex       |
-| `schemas` | `Schemas`    | The list of contract schemas |
+| Argument   | Type      | Description                  |
+| ---------- | --------- | ---------------------------- |
+| `rawEvent` | `string`  | Raw event bytes in hex       |
+| `schemas`  | `Schemas` | The list of contract schemas |
 
 **Example**
 
@@ -137,7 +123,7 @@ Function that accepts raw event bytes and contract event schemas and returns `Ev
 schemas := parseSchemasFromBytes(rawBytes)
 rawEvent  := decodeBase16("some real example here")
 
-event := parseEvent(rawEvent, schemas)
+event := parseEventNameAndData(rawEvent, schemas)
 ```
 
 ### `Event`
@@ -157,8 +143,8 @@ Value-object that represents a parse result. Contains error representing weather
 
 | Property | Type              | Description        |
 | -------- | ----------------- | ------------------ |
-| `Error`  | `string`          | Parse result error |
-| `Event`  | [`Event`](#Event) | ces Event          |
+| `error`  | `string`          | Parse result error |
+| `event`  | [`Event`](#Event) | ces Event          |
 
 ### `Schema`
 
