@@ -1,9 +1,9 @@
-import { CLValue, decodeBase16 } from 'casper-js-sdk';
+import { CLValue, decodeBase16, matchByteParserByCLType } from 'casper-js-sdk';
 import { WithRemainder } from './casper/types';
 
 import {
-  matchByteParserByCLType,
   parseBytesWithRemainder,
+  parseCLValueFromBytesWithRemainder,
 } from './casper/utils';
 import { Schema, Schemas } from './schema';
 
@@ -46,11 +46,15 @@ export function parseEventNameAndData(
 } {
   const event = decodeBase16(rawEvent);
 
-  if (event.length < 4) {
+  const clValueWithRemainder = parseCLValueFromBytesWithRemainder(event);
+
+  if (clValueWithRemainder.data.bytes.length < 4) {
     throw new Error('invalid event bytes');
   }
 
-  const eventNameWithRemainder = parseEventNameWithRemainder(event.subarray(4));
+  const eventNameWithRemainder = parseEventNameWithRemainder(
+    clValueWithRemainder.data.bytes.subarray(4),
+  );
 
   const eventSchema = schemas[eventNameWithRemainder.data];
   if (!eventSchema) {

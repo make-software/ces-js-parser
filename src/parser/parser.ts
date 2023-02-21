@@ -36,19 +36,19 @@ export interface ParseResult {
 
 export class Parser {
   constructor(
-    private readonly contractsSchemas: Record<string, ContractMetadata>,
+    private readonly contractsMetadata: Record<string, ContractMetadata>,
   ) {}
 
   static async initialize(
     rpcClient: CasperServiceByJsonRPC,
     contractHashes: string[],
   ): Promise<Parser> {
-    const contractsSchemas = await Parser.getContractsMetadata(
+    const contractsMetadata = await Parser.getContractsMetadata(
       rpcClient,
       contractHashes,
     );
 
-    return Promise.resolve(new Parser(contractsSchemas));
+    return Promise.resolve(new Parser(contractsMetadata));
   }
 
   public parseExecutionResult(executionResult: ExecutionResult): ParseResult[] {
@@ -103,8 +103,8 @@ export class Parser {
         data: {},
       };
 
-      const contractSchemas = this.contractsSchemas[uref];
-      if (!contractSchemas) {
+      const contractMetadata = this.contractsMetadata[uref];
+      if (!contractMetadata) {
         results.push({
           event: parsedEvent,
           error: `invalid event uref`,
@@ -113,10 +113,10 @@ export class Parser {
         continue;
       }
 
-      parsedEvent.contractHash = contractSchemas.contractHash;
-      parsedEvent.contractPackageHash = contractSchemas.contractPackageHash;
+      parsedEvent.contractHash = contractMetadata.contractHash;
+      parsedEvent.contractPackageHash = contractMetadata.contractPackageHash;
 
-      const eventSchema = contractSchemas.schemas[eventNameWithRemainder.data];
+      const eventSchema = contractMetadata.schemas[eventNameWithRemainder.data];
       if (!eventSchema) {
         results.push({
           event: parsedEvent,
