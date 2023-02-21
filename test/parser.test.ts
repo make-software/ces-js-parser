@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { CasperServiceByJsonRPC, decodeBase16 } from 'casper-js-sdk';
-import { Parser } from '../parser/parser';
-import { parseSchemasFromBytes } from '../parser/schema';
+import { Parser } from '../src/parser/parser';
+import { parseSchemasFromBytes } from '../src/parser/schema';
 
 describe('Parser', () => {
   describe('parseExecutionResult', () => {

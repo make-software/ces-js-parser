@@ -5,7 +5,7 @@ import {
   CLKeyType,
   CLListType,
 } from 'casper-js-sdk';
-import { parseSchemaFromBytesWithRemainder } from '../parser/schema';
+import { parseSchemaFromBytesWithRemainder } from '../src/parser/schema';
 
 describe('Schema', () => {
   describe('parseSchemaFromBytesWithRemainder', () => {
