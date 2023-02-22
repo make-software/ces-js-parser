@@ -63,21 +63,21 @@ results
 
 #### `initialize`
 
-`initialize` is a async factory function that accepts `ContractSchemasClient` and `contractHashes` array and initialized a `Parser` instance:
+`initialize` is a async factory function that accepts `CasperServiceByJsonRPC` and `contractHashes` array and initialized a `Parser` instance:
 
-| Argument                | Type                           | Description                                    |
-| ----------------------- | ------------------------------ | ---------------------------------------------- |
-| `contractSchemasClient` | `casper.ContractSchemasClient` | Instance of the `ContractSchemasClient` client |
-| `contractHashes`        | `string[]`                     | List of the observed contract hashes           |
+| Argument         | Type                     | Description                                     |
+| ---------------- | ------------------------ | ----------------------------------------------- |
+| `rpcClient`      | `CasperServiceByJsonRPC` | Instance of the `CasperServiceByJsonRPC` client |
+| `contractHashes` | `string[]`               | List of the observed contract hashes            |
 
 **Example**
 
 ```typescript
-const contractSchemasClient = new ContractSchemasClient(
+const rpcClient = new CasperServiceByJsonRPC(
   `http://${process.env.NODE_ADDRESS}:7777/rpc`,
 );
 
-const parser = await Parser.initialize(contractSchemasClient, [
+const parser = await Parser.initialize(rpcClient, [
   '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
 ]);
 ```
@@ -150,10 +150,10 @@ Value-object that represents a parse result. Contains error representing weather
 
 Schema is slice of `PropertyDefinition` - value-object that represents an schema item.
 
-| Property   | Type            | Description                 |
-| ---------- | --------------- | --------------------------- |
-| `Property` | `string`        | Name of the schema property |
-| `Value`    | `casper.CLType` | casper CLType               |
+| Property   | Type     | Description                 |
+| ---------- | -------- | --------------------------- |
+| `Property` | `string` | Name of the schema property |
+| `Value`    | `CLType` | casper CLType               |
 
 ### `Schemas`
 
