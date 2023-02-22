@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { CasperServiceByJsonRPC, decodeBase16 } from 'casper-js-sdk';
-import { Parser } from '../src/parser/parser';
-import { parseSchemasFromBytes } from '../src/parser/schema';
+import { Parser } from '../src/parser';
+import { parseSchemasFromBytes } from '../src/schema';
 
 describe('Parser', () => {
   describe('parseExecutionResult', () => {
@@ -42,7 +42,7 @@ describe('Parser', () => {
         },
       });
 
-      const parser = await Parser.initialize(rpcClient, [contractHashHex]);
+      const parser = await Parser.create(rpcClient, [contractHashHex]);
 
       const rawMintDeploy = fs.readFileSync(
         path.resolve(__dirname, './fixtures/deploys/voting_created.json'),

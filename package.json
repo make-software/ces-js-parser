@@ -1,5 +1,5 @@
 {
-  "name": "ces-js-parser",
+  "name": "@make-services/ces-js-parser",
   "version": "1.0.0",
   "description": "Parser for contract level events according to the Casper events standard",
   "main": "dist/lib.node.js",
@@ -67,5 +67,16 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-node-externals": "^3.0.0"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/make-software/ces-js-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/make-software/ces-js-parser/issues"
+  },
+  "homepage": "https://github.com/make-software/ces-js-parser#readme"
 }

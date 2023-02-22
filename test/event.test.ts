@@ -1,6 +1,6 @@
 import { decodeBase16 } from 'casper-js-sdk';
-import { parseEventNameAndData } from '../src/parser/event';
-import { parseSchemasFromBytes } from '../src/parser/schema';
+import { parseEventNameAndData } from '../src/event';
+import { parseSchemasFromBytes } from '../src/schema';
 
 describe('Event', () => {
   const schemaHex =

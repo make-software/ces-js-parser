@@ -8,7 +8,7 @@ The library is built on top of the 'casper-js-sdk' and operates on types defined
 ## Install
 
 ``
-npm install --save ces-js-parser
+npm install --save @make-software/ces-js-parser
 ``
 
 ## Usage
@@ -17,23 +17,24 @@ Here is an example of parsing CES events using `ces-js-parser` from a real Testn
 with `casper-js-sdk`:
 
 ```typescript
-(async () => {
-  const rpcClient = new CasperServiceByJsonRPC(
-    `http://${process.env.NODE_ADDRESS}:7777/rpc`,
-  );
+import { CasperServiceByJsonRPC } from 'casper-js-sdk';
+import { Parser } from '@make-software/ces-js-parser';
 
-  const parser = await Parser.initialize(rpcClient, [
-    '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
-  ]);
+ const rpcClient = new CasperServiceByJsonRPC(
+  `http://${process.env.NODE_ADDRESS}:7777/rpc`,
+);
 
-  const deploy = await rpcClient.getDeployInfo('19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442');
+const parser = await Parser.create(rpcClient, [
+  '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
+]);
 
-  const events = await parser.parseExecutionResult(
-    deploy.execution_results[0].result as ExecutionResult,
-  );
+const deploy = await rpcClient.getDeployInfo('19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442');
 
-  events.forEach(console.log);
-})();
+const events = await parser.parseExecutionResult(
+  deploy.execution_results[0].result as ExecutionResult,
+);
+
+events.forEach(console.log);
 ```
 
 ## API
@@ -45,7 +46,7 @@ JS CES Parser provides several public types and functions:
   - [Usage](#usage)
   - [API](#api)
     - [`Parser`](#parser)
-      - [`initialize`](#initialize)
+      - [`create`](#create)
       - [`parseExecutionResults`](#parseexecutionresults)
       - [`fetchContractSchemasBytes`](#fetchcontractschemasbytes)
     - [`parseSchemasFromBytes`](#parseschemasfrombytes)
@@ -61,9 +62,9 @@ JS CES Parser provides several public types and functions:
 Parser that accepts a list of observed contracts and provides possibility to parse CES events out of deploy execution
 results
 
-#### `initialize`
+#### `create`
 
-`initialize` is a async factory function that accepts `CasperServiceByJsonRPC` and `contractHashes` array and initialized a `Parser` instance:
+`create` is a async factory function that accepts `CasperServiceByJsonRPC` and `contractHashes` array and created a `Parser` instance:
 
 | Argument         | Type                     | Description                                     |
 | ---------------- | ------------------------ | ----------------------------------------------- |
@@ -73,11 +74,14 @@ results
 **Example**
 
 ```typescript
+import { CasperServiceByJsonRPC } from 'casper-js-sdk';
+import { Parser } from '@make-software/ces-js-parser';
+
 const rpcClient = new CasperServiceByJsonRPC(
   `http://${process.env.NODE_ADDRESS}:7777/rpc`,
 );
 
-const parser = await Parser.initialize(rpcClient, [
+const parser = await Parser.create(rpcClient, [
   '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
 ]);
 ```
@@ -119,11 +123,14 @@ Function that accepts raw event bytes and contract event schemas and returns `Ev
 
 **Example**
 
-```
-schemas := parseSchemasFromBytes(rawBytes)
-rawEvent  := decodeBase16("some real example here")
+```typescript
+import { decodeBase16 } from 'casper-js-sdk';
+import { parseSchemasFromBytes, parseEventNameAndData } from '@make-software/ces-js-parser';
 
-event := parseEventNameAndData(rawEvent, schemas)
+const schemas = parseSchemasFromBytes(rawBytes);
+const rawEvent = decodeBase16("some real example here")
+
+const event = parseEventNameAndData(rawEvent, schemas);
 ```
 
 ### `Event`

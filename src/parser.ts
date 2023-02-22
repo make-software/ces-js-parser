@@ -39,7 +39,7 @@ export class Parser {
     private readonly contractsMetadata: Record<string, ContractMetadata>,
   ) {}
 
-  static async initialize(
+  static async create(
     rpcClient: CasperServiceByJsonRPC,
     contractHashes: string[],
   ): Promise<Parser> {
