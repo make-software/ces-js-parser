@@ -1,9 +1,9 @@
 # JS CES Parser
 
-`ces-js-parser` parses contract-level events that follow
+`@make-software/ces-js-parser` parses contract-level events that follow
 the [Casper Event Standard](https://github.com/make-software/casper-event-standard).
 
-The library is built on top of the 'casper-js-sdk' and operates on types defined by the SDK.
+The library is built on top of the [casper-js-sdk](https://github.com/casper-ecosystem/casper-js-sdk) and operates on types defined by the SDK.
 
 ## Install
 

@@ -1,7 +1,7 @@
 {
   "name": "@make-services/ces-js-parser",
   "version": "1.0.0",
-  "description": "Parser for contract level events according to the Casper events standard",
+  "description": "Parser for contract-level events encoded with Casper Event Standard (CES)",
   "main": "dist/lib.node.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -15,12 +15,10 @@
     "test": "jest"
   },
   "keywords": [
-    "Casper",
-    "Event",
-    "Standard",
-    "CES",
-    "BlockChain",
-    "Parser"
+    "casper",
+    "blockchain",
+    "smart-contract",
+    "web3"
   ],
   "author": "",
   "license": "ISC",
