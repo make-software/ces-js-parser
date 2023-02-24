@@ -2,8 +2,9 @@
   "name": "@make-services/ces-js-parser",
   "version": "1.0.0",
   "description": "Parser for contract-level events encoded with Casper Event Standard (CES)",
-  "main": "dist/lib.node.js",
+  "main": "dist/lib.cjs.js",
   "types": "dist/index.d.ts",
+  "browser": "dist/lib.js",
   "scripts": {
     "prepare": "husky-run install",
     "prepublishOnly": "npm run build && npm run test",
@@ -35,10 +36,7 @@
     }
   },
   "dependencies": {
-    "@ethersproject/bignumber": "^5.7.0",
-    "@open-rpc/client-js": "^1.8.1",
-    "casper-js-sdk": "^2.11.0",
-    "ts-results": "^3.3.0"
+    "casper-js-sdk": "^2.11.0"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
