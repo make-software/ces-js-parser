@@ -1,37 +1,35 @@
-# JS CES Parser
+# CES JS Parser
 
-`@make-software/ces-js-parser` parses contract-level events that follow
-the [Casper Event Standard](https://github.com/make-software/casper-event-standard).
+`@make-software/ces-js-parser` parses contract-level events that follow the [Casper Event Standard](https://github.com/make-software/casper-event-standard).
 
 The library is built on top of the [casper-js-sdk](https://github.com/casper-ecosystem/casper-js-sdk) and operates on types defined by the SDK.
 
 ## Install
 
-``
-npm install --save @make-software/ces-js-parser
-``
+`npm install --save @make-software/ces-js-parser`
 
 ## Usage
 
-Here is an example of parsing CES events using `ces-js-parser` from a real Testnet deploy loaded
-with `casper-js-sdk`:
+Here is an example of parsing CES events using `ces-js-parser` from a real Testnet deploy loaded with `casper-js-sdk`:
 
 ```typescript
 import { CasperServiceByJsonRPC } from 'casper-js-sdk';
 import { Parser } from '@make-software/ces-js-parser';
 
- const rpcClient = new CasperServiceByJsonRPC(
-  `http://${process.env.NODE_ADDRESS}:7777/rpc`,
+const rpcClient = new CasperServiceByJsonRPC(
+  `http://${process.env.NODE_ADDRESS}:7777/rpc`
 );
 
 const parser = await Parser.create(rpcClient, [
-  '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
+  '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161'
 ]);
 
-const deploy = await rpcClient.getDeployInfo('19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442');
+const deploy = await rpcClient.getDeployInfo(
+  '19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442'
+);
 
 const events = await parser.parseExecutionResult(
-  deploy.execution_results[0].result as ExecutionResult,
+  deploy.execution_results[0].result as ExecutionResult
 );
 
 events.forEach(console.log);
@@ -39,9 +37,9 @@ events.forEach(console.log);
 
 ## API
 
-JS CES Parser provides several public types and functions:
+CES JS Parser provides several public types and functions:
 
-- [JS CES Parser](#js-ces-parser)
+- [CES JS Parser](#ces-js-parser)
   - [Install](#install)
   - [Usage](#usage)
   - [API](#api)
@@ -59,17 +57,16 @@ JS CES Parser provides several public types and functions:
 
 ### `Parser`
 
-Parser that accepts a list of observed contracts and provides possibility to parse CES events out of deploy execution
-results
+Parser that accepts a list of observed contracts and provides possibility to parse CES events out of deploy execution results
 
 #### `create`
 
 `create` is a async factory function that accepts `CasperServiceByJsonRPC` and `contractHashes` array and created a `Parser` instance:
 
-| Argument         | Type                     | Description                                     |
-| ---------------- | ------------------------ | ----------------------------------------------- |
-| `rpcClient`      | `CasperServiceByJsonRPC` | Instance of the `CasperServiceByJsonRPC` client |
-| `contractHashes` | `string[]`               | List of the observed contract hashes            |
+| Argument | Type | Description |
+| --- | --- | --- |
+| `rpcClient` | `CasperServiceByJsonRPC` | Instance of the `CasperServiceByJsonRPC` client |
+| `contractHashes` | `string[]` | List of the observed contract hashes |
 
 **Example**
 
@@ -78,11 +75,11 @@ import { CasperServiceByJsonRPC } from 'casper-js-sdk';
 import { Parser } from '@make-software/ces-js-parser';
 
 const rpcClient = new CasperServiceByJsonRPC(
-  `http://${process.env.NODE_ADDRESS}:7777/rpc`,
+  `http://${process.env.NODE_ADDRESS}:7777/rpc`
 );
 
 const parser = await Parser.create(rpcClient, [
-  '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161',
+  '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161'
 ]);
 ```
 
@@ -98,15 +95,14 @@ const parser = await Parser.create(rpcClient, [
 
 `fetchContractSchemasBytes` method that accepts contract hash and return bytes representation of stored schema:
 
-| Argument        | Type     | Description                                                |
-| --------------- | -------- | ---------------------------------------------------------- |
-| `contractHash`  | `string` | Contract hash schema want to be fetched                    |
+| Argument | Type | Description |
+| --- | --- | --- |
+| `contractHash` | `string` | Contract hash schema want to be fetched |
 | `stateRootHash` | `string` | State root hash of the data (takes latest if not provided) |
 
 ### `parseSchemasFromBytes`
 
-`parseSchemasFromBytes` function that accepts raw CES schema bytes stored under the contract `__events_schema` URef and
-returns `Schemas`:
+`parseSchemasFromBytes` function that accepts raw CES schema bytes stored under the contract `__events_schema` URef and returns `Schemas`:
 
 | Argument   | Type         | Description                |
 | ---------- | ------------ | -------------------------- |
@@ -125,10 +121,13 @@ Function that accepts raw event bytes and contract event schemas and returns `Ev
 
 ```typescript
 import { decodeBase16 } from 'casper-js-sdk';
-import { parseSchemasFromBytes, parseEventNameAndData } from '@make-software/ces-js-parser';
+import {
+  parseSchemasFromBytes,
+  parseEventNameAndData
+} from '@make-software/ces-js-parser';
 
 const schemas = parseSchemasFromBytes(rawBytes);
-const rawEvent = decodeBase16("some real example here")
+const rawEvent = decodeBase16('some real example here');
 
 const event = parseEventNameAndData(rawEvent, schemas);
 ```
@@ -137,12 +136,12 @@ const event = parseEventNameAndData(rawEvent, schemas);
 
 Type that represents an event:
 
-| Property              | Type                     | Description        |
-| --------------------- | ------------------------ | ------------------ |
-| `contractHash`        | `Uint8Array`             | Event ContractHash |
-| `contractPackageHash` | `Uint8Array`             | Event ContractHash |
-| `name`                | `string`                 | Event name         |
-| `data`                | `Record<string,CLValue>` | Event Data         |
+| Property | Type | Description |
+| --- | --- | --- |
+| `contractHash` | `Uint8Array` | Event ContractHash |
+| `contractPackageHash` | `Uint8Array` | Event ContractHash |
+| `name` | `string` | Event name |
+| `data` | `Record<string,CLValue>` | Event Data |
 
 ### `ParseResult`
 
@@ -170,6 +169,4 @@ Schemas represent a map of event name and its Schema.
 
 To run unit tests for the library, make sure you are in the root of the library:
 
-``
-npm run test
-``
+`npm run test`
