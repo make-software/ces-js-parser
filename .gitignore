@@ -1,0 +1,10 @@
+node_modules
+/dist/
+.eslintcache
+.nyc_output
+
+.vscode
+
+docs/
+
+.DS_Store
