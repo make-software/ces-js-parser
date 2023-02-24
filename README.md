@@ -4,6 +4,12 @@
 
 The library is built on top of the [casper-js-sdk](https://github.com/casper-ecosystem/casper-js-sdk) and operates on types defined by the SDK.
 
+## Contributing
+
+We welcome contributions from anyone interested in improving this project. Before getting started, please take a moment to read our [contributing guidelines](https://github.com/make-software/ces-js-parser/blob/master/CONTRIBUTING.md) to learn more about how to contribute to this project, including how to report bugs, suggest enhancements, and submit pull requests.
+
+We look forward to collaborating with you!
+
 ## Install
 
 `npm install --save @make-software/ces-js-parser`
