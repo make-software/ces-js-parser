@@ -3,17 +3,14 @@ name: Test
 on:
   push:
     branches:
-      - "dev"
-      - "feat-*"
-      - "release-*"
+      - "master"
+      - "rc-*"
     paths-ignore:
       - '**.md'
 
   pull_request:
     branches:
-      - "dev"
-      - "feat-*"
-      - "release-*"
+      - "master"
     paths-ignore:
       - '**.md'
 
