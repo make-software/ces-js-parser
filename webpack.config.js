@@ -23,11 +23,7 @@ const common = {
 const serverConfig = {
   ...common,
   target: 'node',
-  plugins: [
-    new copyPlugin({
-      patterns: [{ from: 'src/@types', to: '@types' }],
-    }),
-  ],
+  plugins: [],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'lib.node.js',
