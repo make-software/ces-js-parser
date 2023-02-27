@@ -64,16 +64,17 @@ export function parseSchemaFromBytesWithRemainder(
 
     const clTypeWithRemainder = matchBytesToCLType(remainder);
 
+    const clType = clTypeWithRemainder.result.unwrap();
+
     if (!clTypeWithRemainder.remainder) {
       throw new Error('remainder is empty');
     }
-
-    const clType = clTypeWithRemainder.result.unwrap();
 
     schema.push({
       property: fieldName,
       value: clType,
     });
+
     remainder = clTypeWithRemainder.remainder;
   }
 
