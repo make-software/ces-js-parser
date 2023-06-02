@@ -21,11 +21,11 @@ const rpcClient = new CasperServiceByJsonRPC(
 );
 
 const parser = await Parser.create(rpcClient, [
-  '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161'
+  '0640eb43bd95d5c88b799862bc9fb42d7a241f1a8aae5deaa03170a27ee8eeaa'
 ]);
 
 const deploy = await rpcClient.getDeployInfo(
-  '19ee17d9e3b4c1527b433598e647b69aa9a153864eb12433489f99224bfc9442'
+  'c1bb9ae27877f5ecf4ef71307e7ee3c403bcace065565c3645b81ec0a9bc8978'
 );
 
 const events = await parser.parseExecutionResult(
