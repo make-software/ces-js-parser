@@ -5,7 +5,12 @@ export {
   fetchContractSchemasBytes,
 } from './parser';
 export { Schemas, Schema, parseSchemasFromBytes } from './schema';
-export { Event, parseEventNameAndData, parseEventDataFromBytes } from './event';
+export {
+  Event,
+  parseEventNameAndData,
+  parseEventDataFromBytes,
+  parseEventNameWithRemainder,
+} from './event';
 export { ExecutionResult } from './casper/types';
 export {
   parseBytesWithRemainder,
