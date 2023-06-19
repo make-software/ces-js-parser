@@ -4,6 +4,11 @@
 
 The library is built on top of the [casper-js-sdk](https://github.com/casper-ecosystem/casper-js-sdk) and operates on types defined by the SDK.
 
+## Prerequisites
+
+- **Node.js Version**: >12.22.10
+- **OS**: Linux, MacOS
+
 ## Install
 
 `npm install --save @make-software/ces-js-parser`
@@ -40,6 +45,7 @@ events.forEach(console.log);
 CES JS Parser provides several public types and functions:
 
 - [CES JS Parser](#ces-js-parser)
+  - [Prerequisites](#prerequisites)
   - [Install](#install)
   - [Usage](#usage)
   - [API](#api)
@@ -54,6 +60,8 @@ CES JS Parser provides several public types and functions:
     - [`Schema`](#schema)
     - [`Schemas`](#schemas)
   - [Tests](#tests)
+  - [License](#license)
+  - [Contributing](#contributing)
 
 ### `Parser`
 
