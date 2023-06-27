@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
-const copyPlugin = require('copy-webpack-plugin');
 
 const common = {
   entry: './src/index.ts',
@@ -38,18 +37,15 @@ const clientConfig = {
   resolve: {
     ...common.resolve,
     fallback: {
+      assert: require.resolve('assert'),
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
-      asert: require.resolve('assert'),
       http: require.resolve('stream-http'),
-      url: require.resolve('url/'),
+      url: require.resolve('url'),
+      util: require.resolve('util'),
       zlib: require.resolve('browserify-zlib'),
-      buffer: require.resolve('buffer/'),
       fs: false,
-      tls: false,
-      https: false,
-      http2: false,
-      net: false,
+      https: require.resolve('https-browserify'),
     },
   },
   plugins: [
