@@ -202,7 +202,7 @@ export class Parser {
       );
 
       const contractPackageHash = contractData.contractPackageHash.replace(
-        'contract-package-wasm',
+        /^(contract-package-wasm|contract-package-)/,
         '',
       );
 
