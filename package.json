@@ -23,23 +23,11 @@
   ],
   "author": "",
   "license": "ISC",
-  "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "git add"
-    ],
-    "*.{js,css,md}": "prettier --write"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "dependencies": {
     "ts-results": "^3.3.0"
   },
   "peerDependencies": {
-    "casper-js-sdk": "^2.12.0"
+    "casper-js-sdk": "^3.0.0-rc04"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
@@ -47,7 +35,7 @@
     "@typescript-eslint/parser": "^5.53.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
-    "casper-js-sdk": "^2.12.0",
+    "casper-js-sdk": "^3.0.0-rc04",
     "copy-webpack-plugin": "^11.0.0",
     "crypto-browserify": "^3.12.0",
     "eslint": "^8.34.0",

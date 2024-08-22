@@ -84,15 +84,16 @@ export async function fetchContractSchemasBytes(
   contractHash: string,
   stateRootHash: string,
 ): Promise<Uint8Array> {
-  const contractData = (
-    await rpcClient.getBlockState(stateRootHash, `hash-${contractHash}`, [])
-  ).Contract;
+  const entity_identifier = {
+    EntityAddr: `entity-contract-${contractHash}`,
+  };
+  const contractData = await rpcClient.getEntity(entity_identifier);
 
-  if (!contractData) {
+  if (!contractData || !contractData.AddressableEntity) {
     throw new Error('contract data not found');
   }
-
-  const eventsSchema = contractData.namedKeys.find(
+  const entity = contractData.AddressableEntity;
+  const eventsSchema = entity.named_keys.find(
     el => el.name === EVENTS_SCHEMA_NAMED_KEY,
   );
   if (!eventsSchema) {
