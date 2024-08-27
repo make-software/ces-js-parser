@@ -181,10 +181,10 @@ To run unit tests for the library, make sure you are in the root of the library:
 
 ## License
 
-This project is licensed under the terms of the [Apache-2.0 license](https://github.com/make-software/ces-js-parser/blob/master/LICENSE).
+This project is licensed under the terms of the [Apache-2.0 license](https://github.com/zajko/ces-js-parser/blob/master/LICENSE).
 
 ## Contributing
 
-We welcome contributions from anyone interested in improving this project. Before getting started, please take a moment to read our [contributing guidelines](https://github.com/make-software/ces-js-parser/blob/master/CONTRIBUTING.md) to learn more about how to contribute to this project, including how to report bugs, suggest enhancements, and submit pull requests.
+We welcome contributions from anyone interested in improving this project. Before getting started, please take a moment to read our [contributing guidelines](https://github.com/zajko/ces-js-parser/blob/master/CONTRIBUTING.md) to learn more about how to contribute to this project, including how to report bugs, suggest enhancements, and submit pull requests.
 
 We look forward to collaborating with you!
