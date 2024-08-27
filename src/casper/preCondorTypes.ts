@@ -1,5 +1,3 @@
-import { CLType } from 'casper-js-sdk-pre-condor';
-
 type TransformValue = any;
 
 interface Transform {

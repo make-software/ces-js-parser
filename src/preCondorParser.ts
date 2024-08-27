@@ -13,8 +13,8 @@ import {
   parseEventNameWithRemainder,
 } from './event';
 import { ExecutionResultV1 } from './casper/preCondorTypes';
-import { parseSchemasFromBytes, Schemas } from './schema';
-import { ParseResult } from './types';
+import { parseSchemasFromBytes } from './schema';
+import { ContractMetadata, ParseResult } from './types';
 import {
   DICTIONARY_PREFIX,
   EVENTS_NAMED_KEY,
@@ -22,14 +22,6 @@ import {
   WithRemainder,
 } from './casper/types';
 import { RawCLValue } from './casper/condorTypes';
-
-export interface ContractMetadata {
-  schemas: Schemas;
-  contractHash: Uint8Array;
-  contractPackageHash: Uint8Array;
-  eventsSchemaUref: string;
-  eventsUref: string;
-}
 
 export class PreCondorParser {
   constructor(
@@ -217,6 +209,13 @@ export class PreCondorParser {
   }
 }
 
+/**
+ * @deprecated This function will only work with pre-Condor nodes or with contracts created pre-condor.
+ * @param rpcClient
+ * @param contractHash
+ * @param stateRootHash
+ * @returns
+ */
 export async function fetchContractSchemasBytes(
   rpcClient: CasperServiceByJsonRPC,
   contractHash: string,

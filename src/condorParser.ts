@@ -19,17 +19,14 @@ import {
 } from './casper/condorTypes';
 import { ExecutionResultV1 } from './casper/preCondorTypes';
 
-import { parseSchemasFromBytes, Schemas } from './schema';
+import { parseSchemasFromBytes } from './schema';
 import { ParseResult } from './types';
-import { DICTIONARY_PREFIX, WithRemainder } from './casper/types';
-
-export interface ContractMetadata {
-  schemas: Schemas;
-  contractHash: Uint8Array;
-  contractPackageHash: Uint8Array;
-  eventsSchemaUref: string;
-  eventsUref: string;
-}
+import {
+  DICTIONARY_PREFIX,
+  EVENTS_NAMED_KEY,
+  EVENTS_SCHEMA_NAMED_KEY,
+  WithRemainder,
+} from './casper/types';
 
 export class CondorParser {
   constructor(
