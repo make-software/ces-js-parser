@@ -9,9 +9,11 @@ on:
 
 jobs:
   publish:
-    secrets:
-      npm-token: ${{ secrets.NPM_TOKEN }}
     runs-on: ubuntu-24.04
+
+    secrets:
+      NPM_TOKEN:
+        required: true
 
     strategy:
       matrix:
@@ -37,7 +39,7 @@ jobs:
       - name: Publish
         uses: JS-DevTools/npm-publish@v3
         with:
-          token: ${{ secrets.npm-token }}
+          token: ${{ secrets.NPM_TOKEN }}
           tag: ${{ env.release_tag }}
           access: 'public'
       - name: Get latest release version number
