@@ -9,6 +9,8 @@ on:
 
 jobs:
   publish:
+    secrets:
+      npm-token: ${{ secrets.NPM_TOKEN }}
     runs-on: ubuntu-24.04
 
     strategy:
@@ -35,7 +37,7 @@ jobs:
       - name: Publish
         uses: JS-DevTools/npm-publish@v3
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          token: ${{ secrets.npm-token }}
           tag: ${{ env.release_tag }}
           access: 'public'
       - name: Get latest release version number
