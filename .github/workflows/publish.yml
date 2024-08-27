@@ -25,6 +25,12 @@ jobs:
           if [ ${{ github.event.release.target_commitish }} == 'condor' ]; then
             echo "release_tag=condor" >> $GITHUB_ENV
           fi
+      - name: do stuff
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          NPM_TOKEN="${{ env.NPM_TOKEN }}"
+          echo "npm_token length: ${#NPM_TOKEN}"
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@5b949b50c3461bbcd5a540b150c368278160234a #v3.4.0
         with:
