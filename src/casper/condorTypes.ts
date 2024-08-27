@@ -7,11 +7,6 @@ export type ExecutionResult =
 
 /** Result interface for an execution result */
 
-export interface WithRemainder<T> {
-  data: T;
-  remainder: Uint8Array;
-}
-
 export interface RawCLValue {
   clType: CLType;
   bytes: Uint8Array;

@@ -12,13 +12,16 @@ import {
   parseEventDataFromBytes,
   parseEventNameWithRemainder,
 } from './event';
-import {
-  ExecutionResultV1,
-  RawCLValue,
-  WithRemainder,
-} from './casper/preCondorTypes';
+import { ExecutionResultV1 } from './casper/preCondorTypes';
 import { parseSchemasFromBytes, Schemas } from './schema';
 import { ParseResult } from './types';
+import {
+  DICTIONARY_PREFIX,
+  EVENTS_NAMED_KEY,
+  EVENTS_SCHEMA_NAMED_KEY,
+  WithRemainder,
+} from './casper/types';
+import { RawCLValue } from './casper/condorTypes';
 
 export interface ContractMetadata {
   schemas: Schemas;
@@ -27,12 +30,6 @@ export interface ContractMetadata {
   eventsSchemaUref: string;
   eventsUref: string;
 }
-
-export const EVENTS_SCHEMA_NAMED_KEY = '__events_schema';
-
-export const EVENTS_NAMED_KEY = '__events';
-
-const DICTIONARY_PREFIX = 'dictionary-';
 
 export class PreCondorParser {
   constructor(
@@ -51,9 +48,7 @@ export class PreCondorParser {
     return Promise.resolve(new PreCondorParser(contractsMetadata));
   }
 
-  public parseExecutionResult(
-    executionResultRaw: any,
-  ): ParseResult[] {
+  public parseExecutionResult(executionResultRaw: any): ParseResult[] {
     let executionResult = executionResultRaw as ExecutionResultV1;
     if (!executionResult.Success) {
       throw new Error('failed deploy');

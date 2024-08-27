@@ -1,4 +1,4 @@
-import { CLType } from 'casper-js-sdk';
+import { CLType } from 'casper-js-sdk-pre-condor';
 
 type TransformValue = any;
 
@@ -22,14 +22,4 @@ interface ExecutionResultBody {
 export interface ExecutionResultV1 {
   Success?: ExecutionResultBody;
   Failure?: ExecutionResultBody;
-}
-
-export interface WithRemainder<T> {
-  data: T;
-  remainder: Uint8Array;
-}
-
-export interface RawCLValue {
-  clType: CLType;
-  bytes: Uint8Array;
 }

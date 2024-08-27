@@ -16,12 +16,12 @@ import {
   ExecutionResult,
   ExecutionResultV2,
   RawCLValue,
-  WithRemainder,
 } from './casper/condorTypes';
 import { ExecutionResultV1 } from './casper/preCondorTypes';
 
 import { parseSchemasFromBytes, Schemas } from './schema';
 import { ParseResult } from './types';
+import { DICTIONARY_PREFIX, WithRemainder } from './casper/types';
 
 export interface ContractMetadata {
   schemas: Schemas;
@@ -30,12 +30,6 @@ export interface ContractMetadata {
   eventsSchemaUref: string;
   eventsUref: string;
 }
-
-export const EVENTS_SCHEMA_NAMED_KEY = '__events_schema';
-
-export const EVENTS_NAMED_KEY = '__events';
-
-const DICTIONARY_PREFIX = 'dictionary-';
 
 export class CondorParser {
   constructor(

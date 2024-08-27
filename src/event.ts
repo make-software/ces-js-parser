@@ -1,11 +1,11 @@
 import { CLValue, decodeBase16, matchByteParserByCLType } from 'casper-js-sdk';
-import { WithRemainder } from './casper/types';
 
 import {
   parseBytesWithRemainder,
   parseCLValueFromBytesWithRemainder,
 } from './casper/utils';
 import { Schema, Schemas } from './schema';
+import { WithRemainder } from './casper/types';
 
 const EVENT_PREFIX = 'event_';
 

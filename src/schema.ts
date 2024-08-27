@@ -1,7 +1,6 @@
 import { CasperServiceByJsonRPC, CLType, decodeBase16 } from 'casper-js-sdk';
-import { WithRemainder } from './casper/types';
 import { matchBytesToCLType, parseBytesWithRemainder } from './casper/utils';
-import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
+import { EVENTS_SCHEMA_NAMED_KEY, WithRemainder } from './casper/types';
 
 export type Schemas = Record<string, Schema>;
 
