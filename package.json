@@ -1,6 +1,6 @@
 {
   "name": "ces-js-parser",
-  "version": "2.0.0-alpha-05",
+  "version": "2.0.0-alpha-06",
   "description": "Parser for contract-level events encoded with Casper Event Standard (CES)",
   "main": "dist/lib.node.js",
   "types": "dist/index.d.ts",
