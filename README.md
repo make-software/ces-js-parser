@@ -1,6 +1,6 @@
 # CES JS Parser
 
-`@make-software/ces-js-parser` parses contract-level events that follow the [Casper Event Standard](https://github.com/make-software/casper-event-standard).
+`ces-js-parser` parses contract-level events that follow the [Casper Event Standard](https://github.com/make-software/casper-event-standard).
 
 The library is built on top of the [casper-js-sdk](https://github.com/casper-ecosystem/casper-js-sdk) and operates on types defined by the SDK.
 
@@ -11,7 +11,7 @@ The library is built on top of the [casper-js-sdk](https://github.com/casper-eco
 
 ## Install
 
-`npm install --save @make-software/ces-js-parser`
+`npm install --save ces-js-parser`
 
 ## Usage
 
@@ -19,7 +19,7 @@ Here is an example of parsing CES events using `ces-js-parser` from a real Testn
 
 ```typescript
 import { CasperServiceByJsonRPC } from 'casper-js-sdk';
-import { Parser } from '@make-software/ces-js-parser';
+import { Parser } from 'ces-js-parser';
 
 const rpcClient = new CasperServiceByJsonRPC(
   `http://${process.env.NODE_ADDRESS}:7777/rpc`
@@ -80,7 +80,7 @@ Parser that accepts a list of observed contracts and provides possibility to par
 
 ```typescript
 import { CasperServiceByJsonRPC } from 'casper-js-sdk';
-import { Parser } from '@make-software/ces-js-parser';
+import { Parser } from 'ces-js-parser';
 
 const rpcClient = new CasperServiceByJsonRPC(
   `http://${process.env.NODE_ADDRESS}:7777/rpc`
@@ -132,7 +132,7 @@ import { decodeBase16 } from 'casper-js-sdk';
 import {
   parseSchemasFromBytes,
   parseEventNameAndData
-} from '@make-software/ces-js-parser';
+} from 'ces-js-parser';
 
 const schemas = parseSchemasFromBytes(rawBytes);
 const rawEvent = decodeBase16('some real example here');
