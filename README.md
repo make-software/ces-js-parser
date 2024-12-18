@@ -20,24 +20,27 @@ Here is an example of parsing CES events using `ces-js-parser` from a real Testn
 ```typescript
 import { CasperServiceByJsonRPC } from 'casper-js-sdk';
 import { Parser } from '@make-software/ces-js-parser';
+import { ExecutionResult } from "./casper/types";
 
-const rpcClient = new CasperServiceByJsonRPC(
-  `http://${process.env.NODE_ADDRESS}:7777/rpc`
-);
+(async() => {
+  const rpcClient = new CasperServiceByJsonRPC(
+          `http://${process.env.NODE_ADDRESS}:7777/rpc`
+  );
 
-const parser = await Parser.create(rpcClient, [
-  '0640eb43bd95d5c88b799862bc9fb42d7a241f1a8aae5deaa03170a27ee8eeaa'
-]);
+  const parser = await Parser.create(rpcClient, [
+    '0640eb43bd95d5c88b799862bc9fb42d7a241f1a8aae5deaa03170a27ee8eeaa'
+  ]);
 
-const deploy = await rpcClient.getDeployInfo(
-  'c1bb9ae27877f5ecf4ef71307e7ee3c403bcace065565c3645b81ec0a9bc8978'
-);
+  const deploy = await rpcClient.getDeployInfo(
+          'c1bb9ae27877f5ecf4ef71307e7ee3c403bcace065565c3645b81ec0a9bc8978'
+  );
 
-const events = await parser.parseExecutionResult(
-  deploy.execution_results[0].result as ExecutionResult
-);
+  const events = parser.parseExecutionResult(
+          deploy.execution_results[0].result as ExecutionResult
+  );
 
-events.forEach(console.log);
+  events.forEach(console.log);
+})()
 ```
 
 ## API
