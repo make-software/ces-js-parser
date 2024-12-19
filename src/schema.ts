@@ -1,13 +1,12 @@
-import { CasperServiceByJsonRPC, CLType, decodeBase16 } from 'casper-js-sdk';
-import { WithRemainder } from './casper/types';
-import { matchBytesToCLType, parseBytesWithRemainder } from './casper/utils';
+import {CLType, CLTypeParser, IResultWithBytes, RpcClient} from 'casper-js-sdk';
 import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
+import { CLValueParser } from "casper-js-sdk/dist/types/clvalue/Parser";
 
 export type Schemas = Record<string, Schema>;
 
-export type Schema = PropertyDefenition[];
+export type Schema = PropertyDefinition[];
 
-interface PropertyDefenition {
+interface PropertyDefinition {
   property: string;
   value: CLType;
 }
@@ -23,17 +22,15 @@ export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
   const schemas: Schemas = {};
 
   for (let i = 0; i < schemasNumber; i++) {
-    const rawBytesWithRemainder = parseBytesWithRemainder(remainder);
-
-    const schemaName = new TextDecoder().decode(rawBytesWithRemainder.data);
+    const schemaName = CLValueParser.fromBytesWithType(remainder);
 
     const schemaWithRemainder = parseSchemaFromBytesWithRemainder(
-      rawBytesWithRemainder.remainder,
+      schemaName.bytes,
     );
 
-    schemas[schemaName] = schemaWithRemainder.data;
+    schemas[schemaName.result.toString()] = schemaWithRemainder.result;
 
-    remainder = schemaWithRemainder.remainder;
+    remainder = schemaWithRemainder.bytes;
   }
 
   return schemas;
@@ -41,7 +38,7 @@ export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
 
 export function parseSchemaFromBytesWithRemainder(
   rawBytes: Uint8Array,
-): WithRemainder<Schema> {
+): IResultWithBytes<Schema> {
   const fieldsNumber = Buffer.from(rawBytes).readUInt32LE(0);
   if (fieldsNumber > rawBytes.length) {
     throw new Error('invalid fieldsNumber value');
@@ -52,47 +49,42 @@ export function parseSchemaFromBytesWithRemainder(
   const schema: Schema = [];
 
   for (let i = 0; i < fieldsNumber; i++) {
-    const rawBytesWithRemainder = parseBytesWithRemainder(remainder);
+    const fieldName = CLValueParser.fromBytesWithType(remainder);
 
-    const fieldName = new TextDecoder().decode(rawBytesWithRemainder.data);
-    remainder = rawBytesWithRemainder.remainder;
+    const clTypeWithRemainder = CLTypeParser.matchBytesToCLType(fieldName.bytes);
 
-    const clTypeWithRemainder = matchBytesToCLType(remainder);
+    remainder = fieldName.bytes;
 
-    const clType = clTypeWithRemainder.result.unwrap();
-
-    if (!clTypeWithRemainder.remainder) {
+    if (!clTypeWithRemainder.bytes) {
       throw new Error('remainder is empty');
     }
 
     schema.push({
-      property: fieldName,
-      value: clType,
+      property: fieldName.result.toString(),
+      value: clTypeWithRemainder.result,
     });
 
-    remainder = clTypeWithRemainder.remainder;
+    remainder = clTypeWithRemainder.bytes;
   }
 
   return {
-    data: schema,
-    remainder,
+    result: schema,
+    bytes: remainder,
   };
 }
 
 export async function fetchContractSchemasBytes(
-  rpcClient: CasperServiceByJsonRPC,
+  rpcClient: RpcClient,
   contractHash: string,
   stateRootHash: string,
 ): Promise<Uint8Array> {
-  const contractData = (
-    await rpcClient.getBlockState(stateRootHash, `hash-${contractHash}`, [])
-  ).Contract;
+  const contractData = await rpcClient.getStateItem(stateRootHash, `hash-${contractHash}`, []);
 
-  if (!contractData) {
+  if (!contractData || !contractData.storedValue.contract) {
     throw new Error('contract data not found');
   }
 
-  const eventsSchema = contractData.namedKeys.find(
+  const eventsSchema = contractData.storedValue.contract.namedKeys.keys.find(
     el => el.name === EVENTS_SCHEMA_NAMED_KEY,
   );
   if (!eventsSchema) {
@@ -101,14 +93,11 @@ export async function fetchContractSchemasBytes(
     );
   }
 
-  const schemaResponse = await rpcClient['client'].request({
-    method: 'state_get_item',
-    params: {
-      state_root_hash: stateRootHash,
-      key: eventsSchema.key,
-      path: [],
-    },
-  });
+  const schemaResponse = await rpcClient.getStateItem(stateRootHash, eventsSchema.key.toString(), []);
 
-  return decodeBase16(schemaResponse.stored_value.CLValue.bytes);
+  if (!schemaResponse.storedValue.clValue) {
+    throw new Error('no CLValue for schema');
+  }
+
+  return schemaResponse.storedValue.clValue.bytes();
 }
