@@ -1,6 +1,6 @@
-import { decodeBase16 } from 'casper-js-sdk';
-import { parseEventNameAndData } from '../src/event';
-import { parseSchemasFromBytes } from '../src/schema';
+import {Conversions} from 'casper-js-sdk';
+import {parseEventNameAndData} from '../src/event';
+import {parseSchemasFromBytes} from '../src/schema';
 
 describe('Event', () => {
   const schemaHex =
@@ -11,7 +11,7 @@ describe('Event', () => {
 
   describe('parseEventNameAndData', () => {
     it('should parse event via given schema', () => {
-      const schemas = parseSchemasFromBytes(decodeBase16(schemaHex));
+      const schemas = parseSchemasFromBytes(Conversions.decodeBase16(schemaHex));
 
       const eventNameAndData = parseEventNameAndData(transformBytes, schemas);
 
@@ -19,11 +19,20 @@ describe('Event', () => {
 
       expect(Object.keys(eventNameAndData.data).length).toEqual(5);
 
-      expect(eventNameAndData.data.voter.value()).toBeDefined();
-      expect(eventNameAndData.data.voting_id.value()).toBeDefined();
-      expect(eventNameAndData.data.voting_type.value()).toBeDefined();
-      expect(eventNameAndData.data.choice.value()).toBeDefined();
-      expect(eventNameAndData.data.stake.value()).toBeDefined();
+      expect(eventNameAndData.data.voter.key).toBeDefined();
+      expect(eventNameAndData.data.voter.key!.toString()).toEqual("account-hash-56befc13a6fd62e18f361700a5e08f966901c34df8041b36ec97d54d605c23de");
+
+      expect(eventNameAndData.data.voting_id.ui32).toBeDefined();
+      expect(eventNameAndData.data.voting_id.ui32!.toNumber()).toEqual(0);
+
+      expect(eventNameAndData.data.voting_type.ui8).toBeDefined();
+      expect(eventNameAndData.data.voting_type.ui8!.toNumber()).toEqual(0);
+
+      expect(eventNameAndData.data.choice.ui8).toBeDefined();
+      expect(eventNameAndData.data.choice.ui8!.toNumber()).toEqual(1);
+
+      expect(eventNameAndData.data.stake.ui512).toBeDefined();
+      expect(eventNameAndData.data.stake.ui512!.toNumber()).toEqual(1000);
     });
   });
 });

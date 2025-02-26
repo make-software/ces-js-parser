@@ -1,8 +1,6 @@
-import { CLValue, Hash, IResultWithBytes } from 'casper-js-sdk';
-import { toBytesString } from "casper-js-sdk/dist/types/ByteConverters";
-import { CLValueParser } from "casper-js-sdk/dist/types/clvalue/Parser";
+import {CLTypeString, CLValue, CLValueParser, Conversions, Hash, IResultWithBytes} from 'casper-js-sdk';
 
-import { Schema, Schemas } from './schema';
+import {Schema, Schemas} from './schema';
 
 const EVENT_PREFIX = 'event_';
 
@@ -10,17 +8,16 @@ export interface Event {
   name: string;
   contractHash: Hash | null;
   contractPackageHash: Hash | null;
+  eventId: number;
   data: Record<string, CLValue>;
 }
 
 export function parseEventNameWithRemainder(
   rawEvent: Uint8Array,
 ): IResultWithBytes<string> {
-  const eventNameWithRemainder = CLValueParser.fromBytesWithType(rawEvent);
+  const eventNameWithRemainder = CLValueParser.fromBytesByType(rawEvent, CLTypeString);
 
-  const eventNameWithPrefix = new TextDecoder().decode(
-    eventNameWithRemainder.result.bytes(),
-  );
+  const eventNameWithPrefix = eventNameWithRemainder.result.toString();
 
   if (!eventNameWithPrefix.startsWith(EVENT_PREFIX)) {
     throw new Error('no event_ prefix for event');
@@ -41,7 +38,7 @@ export function parseEventNameAndData(
   name: string;
   data: Record<string, CLValue>;
 } {
-  const event = toBytesString(rawEvent);
+  const event = Conversions.decodeBase16(rawEvent);
 
   const clValueWithRemainder = CLValueParser.fromBytesWithType(event);
 
