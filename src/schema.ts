@@ -10,7 +10,7 @@ import {
   RpcClient,
   TypeID,
 } from 'casper-js-sdk';
-import {EVENTS_SCHEMA_NAMED_KEY} from './parser';
+import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
 
 export type Schemas = Record<string, Schema>;
 
@@ -32,7 +32,10 @@ export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
     ),
   );
 
-  const clValue = CLValueParser.fromBytesByType(rawSchemas, clTypeParsingSchema);
+  const clValue = CLValueParser.fromBytesByType(
+    rawSchemas,
+    clTypeParsingSchema,
+  );
 
   const schemas: Schemas = {};
 

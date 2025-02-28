@@ -18,22 +18,21 @@ The library is built on top of the [casper-js-sdk](https://github.com/casper-eco
 Here is an example of parsing CES events using `ces-js-parser` from a real Testnet deploy loaded with `casper-js-sdk`:
 
 ```typescript
-import { CasperServiceByJsonRPC } from 'casper-js-sdk';
+import { HttpHandler, RpcClient } from 'casper-js-sdk';
 import { Parser } from '@make-software/ces-js-parser';
-import { ExecutionResult } from "./casper/types";
 
 (async() => {
-  const rpcClient = new CasperServiceByJsonRPC(
-          `http://${process.env.NODE_ADDRESS}:7777/rpc`
+  const rpcHandler = new HttpHandler('http://${process.env.NODE_ADDRESS}:7777/rpc');
+
+  const rpcClient = new RpcClient(rpcHandler);
+
+  const transaction = await rpcClient.getTransactionByDeployHash(
+          'c1bb9ae27877f5ecf4ef71307e7ee3c403bcace065565c3645b81ec0a9bc8978'
   );
 
   const parser = await Parser.create(rpcClient, [
     '0640eb43bd95d5c88b799862bc9fb42d7a241f1a8aae5deaa03170a27ee8eeaa'
   ]);
-
-  const deploy = await rpcClient.getDeployInfo(
-          'c1bb9ae27877f5ecf4ef71307e7ee3c403bcace065565c3645b81ec0a9bc8978'
-  );
 
   const events = parser.parseExecutionResult(
           deploy.execution_results[0].result as ExecutionResult
@@ -82,12 +81,12 @@ Parser that accepts a list of observed contracts and provides possibility to par
 **Example**
 
 ```typescript
-import { CasperServiceByJsonRPC } from 'casper-js-sdk';
+import { HttpHandler, RpcClient } from 'casper-js-sdk';
 import { Parser } from '@make-software/ces-js-parser';
 
-const rpcClient = new CasperServiceByJsonRPC(
-  `http://${process.env.NODE_ADDRESS}:7777/rpc`
-);
+const rpcHandler = new HttpHandler('http://${process.env.NODE_ADDRESS}:7777/rpc');
+
+const rpcClient = new RpcClient(rpcHandler);
 
 const parser = await Parser.create(rpcClient, [
   '214a0e730e14501d1e3e03504d3a2f940ef32830b13fa47f9d85a40f73b78161'
