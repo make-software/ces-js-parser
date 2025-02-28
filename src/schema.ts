@@ -6,9 +6,9 @@ import {
   CLValueParser,
   CLValueUInt32,
   IResultWithBytes,
-  RpcClient
+  RpcClient,
 } from 'casper-js-sdk';
-import {EVENTS_SCHEMA_NAMED_KEY} from './parser';
+import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
 
 export type Schemas = Record<string, Schema>;
 
@@ -67,7 +67,9 @@ export function parseSchemaFromBytesWithRemainder(
   for (let i = 0; i < fieldsNumber; i++) {
     const fieldName = CLValueParser.fromBytesByType(remainder, CLTypeString);
 
-    const clTypeWithRemainder = CLTypeParser.matchBytesToCLType(fieldName.bytes);
+    const clTypeWithRemainder = CLTypeParser.matchBytesToCLType(
+      fieldName.bytes,
+    );
 
     if (!clTypeWithRemainder.bytes) {
       throw new Error('remainder is empty');
@@ -92,7 +94,11 @@ export async function fetchContractSchemasBytes(
   contractHash: string,
   stateRootHash: string,
 ): Promise<Uint8Array> {
-  const contractData = await rpcClient.getStateItem(stateRootHash, `hash-${contractHash}`, []);
+  const contractData = await rpcClient.getStateItem(
+    stateRootHash,
+    `hash-${contractHash}`,
+    [],
+  );
 
   if (!contractData || !contractData.storedValue.contract) {
     throw new Error('contract data not found');
@@ -107,7 +113,11 @@ export async function fetchContractSchemasBytes(
     );
   }
 
-  const schemaResponse = await rpcClient.getStateItem(stateRootHash, eventsSchema.key.toString(), []);
+  const schemaResponse = await rpcClient.getStateItem(
+    stateRootHash,
+    eventsSchema.key.toString(),
+    [],
+  );
 
   if (!schemaResponse.storedValue.clValue) {
     throw new Error('no CLValue for schema');

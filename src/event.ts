@@ -1,6 +1,13 @@
-import {CLTypeString, CLValue, CLValueParser, Conversions, Hash, IResultWithBytes} from 'casper-js-sdk';
+import {
+  CLTypeString,
+  CLValue,
+  CLValueParser,
+  Conversions,
+  Hash,
+  IResultWithBytes,
+} from 'casper-js-sdk';
 
-import {Schema, Schemas} from './schema';
+import { Schema, Schemas } from './schema';
 
 const EVENT_PREFIX = 'event_';
 
@@ -15,7 +22,10 @@ export interface Event {
 export function parseEventNameWithRemainder(
   rawEvent: Uint8Array,
 ): IResultWithBytes<string> {
-  const eventNameWithRemainder = CLValueParser.fromBytesByType(rawEvent, CLTypeString);
+  const eventNameWithRemainder = CLValueParser.fromBytesByType(
+    rawEvent,
+    CLTypeString,
+  );
 
   const eventNameWithPrefix = eventNameWithRemainder.result.toString();
 
@@ -57,10 +67,7 @@ export function parseEventNameAndData(
 
   return {
     name: eventNameWithRemainder.result,
-    data: parseEventDataFromBytes(
-      eventSchema,
-      eventNameWithRemainder.bytes,
-    ),
+    data: parseEventDataFromBytes(eventSchema, eventNameWithRemainder.bytes),
   };
 }
 
@@ -73,7 +80,10 @@ export function parseEventDataFromBytes(
   let remainder = rawBytes;
 
   for (const item of schema) {
-    const clValueWithRemainder = CLValueParser.fromBytesByType(remainder, item.value);
+    const clValueWithRemainder = CLValueParser.fromBytesByType(
+      remainder,
+      item.value,
+    );
 
     if (!clValueWithRemainder.bytes) {
       throw new Error('remainder is empty');
