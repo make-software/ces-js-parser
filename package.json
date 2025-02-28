@@ -1,6 +1,6 @@
 {
   "name": "@make-software/ces-js-parser",
-  "version": "1.3.2",
+  "version": "2.0.0-beta1",
   "description": "Parser for contract-level events encoded with Casper Event Standard (CES)",
   "main": "dist/lib.node.js",
   "types": "dist/index.d.ts",
