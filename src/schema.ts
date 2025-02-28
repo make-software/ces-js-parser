@@ -1,14 +1,16 @@
 import {
   CLType,
-  CLTypeParser,
+  CLTypeDynamic,
+  CLTypeList,
+  CLTypeMap,
   CLTypeString,
-  CLTypeUInt32,
+  CLTypeTuple2,
   CLValueParser,
-  CLValueUInt32,
   IResultWithBytes,
   RpcClient,
+  TypeID,
 } from 'casper-js-sdk';
-import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
+import {EVENTS_SCHEMA_NAMED_KEY} from './parser';
 
 export type Schemas = Record<string, Schema>;
 
@@ -20,28 +22,27 @@ interface PropertyDefinition {
 }
 
 export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
-  const schemasNumCLValue = CLValueUInt32.fromBytes(rawSchemas);
-  const schemasNumber = schemasNumCLValue.result.toNumber();
-  if (schemasNumber === 0 || schemasNumber > rawSchemas.length) {
-    throw new Error('invalid schemasNumber value');
-  }
+  const clTypeParsingSchema = new CLTypeMap(
+    CLTypeString,
+    new CLTypeList(
+      new CLTypeTuple2(
+        CLTypeString,
+        new CLTypeDynamic(TypeID.String, CLTypeString),
+      ),
+    ),
+  );
 
-  // TODO: Add native parsing of schema by js sdk when fix for parsing is released
-
-  let remainder = schemasNumCLValue.bytes;
+  const clValue = CLValueParser.fromBytesByType(rawSchemas, clTypeParsingSchema);
 
   const schemas: Schemas = {};
 
-  for (let i = 0; i < schemasNumber; i++) {
-    const schemaName = CLValueParser.fromBytesByType(remainder, CLTypeString);
+  const map = clValue.result.map!.getMap();
 
-    const schemaWithRemainder = parseSchemaFromBytesWithRemainder(
-      schemaName.bytes,
-    );
-
-    schemas[schemaName.result.toString()] = schemaWithRemainder.result;
-
-    remainder = schemaWithRemainder.bytes;
+  for (const [key, value] of Object.entries(map)) {
+    schemas[key] = value.list!.elements.map(el => ({
+      property: el.tuple2!.inner1.stringVal!.toString(),
+      value: (el.tuple2!.inner2.type as CLTypeDynamic).inner,
+    }));
   }
 
   return schemas;
@@ -50,43 +51,21 @@ export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
 export function parseSchemaFromBytesWithRemainder(
   rawBytes: Uint8Array,
 ): IResultWithBytes<Schema> {
-  const fieldsNumResult = CLValueParser.fromBytesByType(rawBytes, CLTypeUInt32);
-  const ui32Value = fieldsNumResult.result.ui32;
-  if (!ui32Value) {
-    throw new Error('invalid ui32 clvalue for fields number');
-  }
-  const fieldsNumber = ui32Value.toNumber();
-  if (fieldsNumber > rawBytes.length) {
-    throw new Error('invalid fieldsNumber value');
-  }
+  const clTypeParsingSchema = new CLTypeList(
+    new CLTypeTuple2(
+      CLTypeString,
+      new CLTypeDynamic(TypeID.String, CLTypeString),
+    ),
+  );
 
-  let remainder = fieldsNumResult.bytes;
+  const clValue = CLValueParser.fromBytesByType(rawBytes, clTypeParsingSchema);
 
-  const schema: Schema = [];
+  const schema: Schema = clValue.result.list!.elements.map(el => ({
+    property: el.tuple2!.inner1.stringVal!.toString(),
+    value: (el.tuple2!.inner2.type as CLTypeDynamic).inner,
+  }));
 
-  for (let i = 0; i < fieldsNumber; i++) {
-    const fieldName = CLValueParser.fromBytesByType(remainder, CLTypeString);
-
-    const clTypeWithRemainder = CLTypeParser.matchBytesToCLType(
-      fieldName.bytes,
-    );
-
-    if (!clTypeWithRemainder.bytes) {
-      throw new Error('remainder is empty');
-    }
-
-    schema.push({
-      property: fieldName.result.toString(),
-      value: clTypeWithRemainder.result,
-    });
-
-    remainder = clTypeWithRemainder.bytes;
-  }
-
-  return {
-    result: schema,
-    bytes: remainder,
-  };
+  return { result: schema, bytes: clValue.bytes };
 }
 
 export async function fetchContractSchemasBytes(
