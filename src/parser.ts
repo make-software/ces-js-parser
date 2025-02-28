@@ -219,14 +219,7 @@ export class Parser {
   }
 
   newDictionaryFromBytes(data: Uint8Array): Dictionary {
-    const u32 = CLValueUInt32.fromBytes(data);
-    const length = u32.result.toNumber();
-
-    if (!length) {
-      throw new Error(`Invalid length for bytes: ${length}`);
-    }
-
-    const clValue = CLValueParser.fromBytesWithType(u32.bytes);
+    const clValue = CLValueParser.fromBytesWithType(data);
 
     if (
       !(clValue.result.type instanceof CLTypeList) ||

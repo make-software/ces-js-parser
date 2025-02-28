@@ -53,10 +53,10 @@ describe('Schema', () => {
       expect(schema.result[0].value.getTypeID()).toEqual(TypeID.ByteArray);
 
       expect(schema.result[1].property).toEqual('token_id');
-      expect(schema.result[1].value.getTypeID()).toEqual(TypeID.ByteArray);
+      expect(schema.result[1].value.getTypeID()).toEqual(TypeID.U256);
 
       expect(schema.result[2].property).toEqual('offerer');
-      expect(schema.result[2].value.getTypeID()).toEqual(TypeID.ByteArray);
+      expect(schema.result[2].value.getTypeID()).toEqual(TypeID.Key);
     });
   });
 });
