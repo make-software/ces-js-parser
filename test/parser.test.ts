@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { CasperServiceByJsonRPC, decodeBase16 } from 'casper-js-sdk';
-import { Parser } from '../src/parser';
-import { parseSchemasFromBytes } from '../src/schema';
+import {Conversions, HttpHandler, InfoGetTransactionResult, RpcClient} from 'casper-js-sdk';
+import {Parser, parseSchemasFromBytes} from '../src';
 
 describe('Parser', () => {
   describe('parseExecutionResult', () => {
@@ -14,15 +13,17 @@ describe('Parser', () => {
       const contractHashHex =
         'ea0c001d969da098fefec42b141db88c74c5682e49333ded78035540a0b4f0bc';
 
-      const contractHash = decodeBase16(contractHashHex);
+      const contractHash = Conversions.decodeBase16(contractHashHex);
 
-      const contractPackageHash = decodeBase16(
+      const contractPackageHash = Conversions.decodeBase16(
         '7a5fce1d9ad45c9d71a5e59638602213295a51a6cf92518f8b262cd3e23d6d7e',
       );
 
-      const schemas = parseSchemasFromBytes(decodeBase16(schemaHex));
+      const schemas = parseSchemasFromBytes(Conversions.decodeBase16(schemaHex));
 
-      const rpcClient = new CasperServiceByJsonRPC('');
+      const rpcHandler = new HttpHandler('');
+
+      const rpcClient = new RpcClient(rpcHandler);
 
       Parser['getContractsMetadata'] = jest.fn();
 
@@ -49,10 +50,10 @@ describe('Parser', () => {
         'utf-8',
       );
 
-      const deploy = JSON.parse(rawMintDeploy);
+      const transactionResult = InfoGetTransactionResult.fromJSON(rawMintDeploy);
 
       const events = parser.parseExecutionResult(
-        deploy.execution_results[0].result,
+        transactionResult!.executionInfo!.executionResult,
       );
 
       expect(events.length).toEqual(2);
@@ -64,11 +65,11 @@ describe('Parser', () => {
 
       expect(Object.keys(events[0].event!.data!).length).toEqual(5);
 
-      expect(events[0].event!.data!.voter.value()).toBeDefined();
-      expect(events[0].event!.data!.voting_id.value()).toBeDefined();
-      expect(events[0].event!.data!.voting_type.value()).toBeDefined();
-      expect(events[0].event!.data!.choice.value()).toBeDefined();
-      expect(events[0].event!.data!.stake.value()).toBeDefined();
+      expect(events[0].event!.data!.voter.key).toBeDefined();
+      expect(events[0].event!.data!.voting_id.ui32).toBeDefined();
+      expect(events[0].event!.data!.voting_type.ui8).toBeDefined();
+      expect(events[0].event!.data!.choice.ui8).toBeDefined();
+      expect(events[0].event!.data!.stake.ui512).toBeDefined();
 
       // SimpleVotingCreated
       expect(events[1].event!.name).toEqual('SimpleVotingCreated');
@@ -77,31 +78,31 @@ describe('Parser', () => {
 
       expect(Object.keys(events[1].event!.data!).length).toEqual(12);
 
-      expect(events[1].event!.data!.document_hash.value()).toBeDefined();
-      expect(events[1].event!.data!.creator.value()).toBeDefined();
-      expect(events[1].event!.data!.stake.value()).toBeDefined();
-      expect(events[1].event!.data!.voting_id.value()).toBeDefined();
+      expect(events[1].event!.data!.document_hash).toBeDefined();
+      expect(events[1].event!.data!.creator).toBeDefined();
+      expect(events[1].event!.data!.stake).toBeDefined();
+      expect(events[1].event!.data!.voting_id).toBeDefined();
       expect(
-        events[1].event!.data!.config_informal_quorum.value(),
+        events[1].event!.data!.config_informal_quorum,
       ).toBeDefined();
       expect(
-        events[1].event!.data!.config_informal_voting_time.value(),
+        events[1].event!.data!.config_informal_voting_time,
       ).toBeDefined();
-      expect(events[1].event!.data!.config_formal_quorum.value()).toBeDefined();
+      expect(events[1].event!.data!.config_formal_quorum).toBeDefined();
       expect(
-        events[1].event!.data!.config_formal_voting_time.value(),
-      ).toBeDefined();
-      expect(
-        events[1].event!.data!.config_total_onboarded.value(),
+        events[1].event!.data!.config_formal_voting_time,
       ).toBeDefined();
       expect(
-        events[1].event!.data!.config_double_time_between_votings.value(),
+        events[1].event!.data!.config_total_onboarded,
       ).toBeDefined();
       expect(
-        events[1].event!.data!.config_voting_clearness_delta.value(),
+        events[1].event!.data!.config_double_time_between_votings,
       ).toBeDefined();
       expect(
-        events[1].event!.data!.config_time_between_informal_and_formal_voting.value(),
+        events[1].event!.data!.config_voting_clearness_delta,
+      ).toBeDefined();
+      expect(
+        events[1].event!.data!.config_time_between_informal_and_formal_voting,
       ).toBeDefined();
     });
   });

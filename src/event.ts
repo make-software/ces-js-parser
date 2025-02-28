@@ -1,29 +1,33 @@
-import { CLValue, decodeBase16, matchByteParserByCLType } from 'casper-js-sdk';
-import { WithRemainder } from './casper/types';
-
 import {
-  parseBytesWithRemainder,
-  parseCLValueFromBytesWithRemainder,
-} from './casper/utils';
+  CLTypeString,
+  CLValue,
+  CLValueParser,
+  Conversions,
+  Hash,
+  IResultWithBytes,
+} from 'casper-js-sdk';
+
 import { Schema, Schemas } from './schema';
 
 const EVENT_PREFIX = 'event_';
 
 export interface Event {
   name: string;
-  contractHash: Uint8Array | null;
-  contractPackageHash: Uint8Array | null;
+  contractHash: Hash | null;
+  contractPackageHash: Hash | null;
+  eventId: number;
   data: Record<string, CLValue>;
 }
 
 export function parseEventNameWithRemainder(
   rawEvent: Uint8Array,
-): WithRemainder<string> {
-  const eventNameWithRemainder = parseBytesWithRemainder(rawEvent);
-
-  const eventNameWithPrefix = new TextDecoder().decode(
-    eventNameWithRemainder.data,
+): IResultWithBytes<string> {
+  const eventNameWithRemainder = CLValueParser.fromBytesByType(
+    rawEvent,
+    CLTypeString,
   );
+
+  const eventNameWithPrefix = eventNameWithRemainder.result.toString();
 
   if (!eventNameWithPrefix.startsWith(EVENT_PREFIX)) {
     throw new Error('no event_ prefix for event');
@@ -32,8 +36,8 @@ export function parseEventNameWithRemainder(
   const eventName = eventNameWithPrefix.replace('event_', '');
 
   return {
-    data: eventName,
-    remainder: eventNameWithRemainder.remainder,
+    result: eventName,
+    bytes: eventNameWithRemainder.bytes,
   };
 }
 
@@ -44,29 +48,26 @@ export function parseEventNameAndData(
   name: string;
   data: Record<string, CLValue>;
 } {
-  const event = decodeBase16(rawEvent);
+  const event = Conversions.decodeBase16(rawEvent);
 
-  const clValueWithRemainder = parseCLValueFromBytesWithRemainder(event);
+  const clValueWithRemainder = CLValueParser.fromBytesWithType(event);
 
-  if (clValueWithRemainder.data.bytes.length < 4) {
+  if (clValueWithRemainder.result.bytes().length < 4) {
     throw new Error('invalid event bytes');
   }
 
   const eventNameWithRemainder = parseEventNameWithRemainder(
-    clValueWithRemainder.data.bytes.subarray(4),
+    clValueWithRemainder.result.bytes().subarray(4),
   );
 
-  const eventSchema = schemas[eventNameWithRemainder.data];
+  const eventSchema = schemas[eventNameWithRemainder.result];
   if (!eventSchema) {
     throw new Error('event name not in schema');
   }
 
   return {
-    name: eventNameWithRemainder.data,
-    data: parseEventDataFromBytes(
-      eventSchema,
-      eventNameWithRemainder.remainder,
-    ),
+    name: eventNameWithRemainder.result,
+    data: parseEventDataFromBytes(eventSchema, eventNameWithRemainder.bytes),
   };
 }
 
@@ -79,19 +80,17 @@ export function parseEventDataFromBytes(
   let remainder = rawBytes;
 
   for (const item of schema) {
-    const parser = matchByteParserByCLType(item.value).unwrap();
-
-    const clValueWithRemainder = parser.fromBytesWithRemainder(
+    const clValueWithRemainder = CLValueParser.fromBytesByType(
       remainder,
       item.value,
     );
 
-    if (!clValueWithRemainder.remainder) {
+    if (!clValueWithRemainder.bytes) {
       throw new Error('remainder is empty');
     }
 
-    result[item.property] = clValueWithRemainder.result.unwrap();
-    remainder = clValueWithRemainder.remainder;
+    result[item.property] = clValueWithRemainder.result;
+    remainder = clValueWithRemainder.bytes;
   }
 
   return result;

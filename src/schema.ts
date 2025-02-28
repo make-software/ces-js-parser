@@ -1,39 +1,51 @@
-import { CasperServiceByJsonRPC, CLType, decodeBase16 } from 'casper-js-sdk';
-import { WithRemainder } from './casper/types';
-import { matchBytesToCLType, parseBytesWithRemainder } from './casper/utils';
+import {
+  CLType,
+  CLTypeDynamic,
+  CLTypeList,
+  CLTypeMap,
+  CLTypeString,
+  CLTypeTuple2,
+  CLValueParser,
+  IResultWithBytes,
+  RpcClient,
+  TypeID,
+} from 'casper-js-sdk';
 import { EVENTS_SCHEMA_NAMED_KEY } from './parser';
 
 export type Schemas = Record<string, Schema>;
 
-export type Schema = PropertyDefenition[];
+export type Schema = PropertyDefinition[];
 
-interface PropertyDefenition {
+interface PropertyDefinition {
   property: string;
   value: CLType;
 }
 
 export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
-  const schemasNumber = Buffer.from(rawSchemas).readUInt32LE(0);
-  if (schemasNumber === 0 || schemasNumber > rawSchemas.length) {
-    throw new Error('invalid schemasNumber value');
-  }
+  const clTypeParsingSchema = new CLTypeMap(
+    CLTypeString,
+    new CLTypeList(
+      new CLTypeTuple2(
+        CLTypeString,
+        new CLTypeDynamic(TypeID.String, CLTypeString),
+      ),
+    ),
+  );
 
-  let remainder = rawSchemas.subarray(4);
+  const clValue = CLValueParser.fromBytesByType(
+    rawSchemas,
+    clTypeParsingSchema,
+  );
 
   const schemas: Schemas = {};
 
-  for (let i = 0; i < schemasNumber; i++) {
-    const rawBytesWithRemainder = parseBytesWithRemainder(remainder);
+  const map = clValue.result.map!.getMap();
 
-    const schemaName = new TextDecoder().decode(rawBytesWithRemainder.data);
-
-    const schemaWithRemainder = parseSchemaFromBytesWithRemainder(
-      rawBytesWithRemainder.remainder,
-    );
-
-    schemas[schemaName] = schemaWithRemainder.data;
-
-    remainder = schemaWithRemainder.remainder;
+  for (const [key, value] of Object.entries(map)) {
+    schemas[key] = value.list!.elements.map(el => ({
+      property: el.tuple2!.inner1.stringVal!.toString(),
+      value: (el.tuple2!.inner2.type as CLTypeDynamic).inner,
+    }));
   }
 
   return schemas;
@@ -41,58 +53,40 @@ export function parseSchemasFromBytes(rawSchemas: Uint8Array): Schemas {
 
 export function parseSchemaFromBytesWithRemainder(
   rawBytes: Uint8Array,
-): WithRemainder<Schema> {
-  const fieldsNumber = Buffer.from(rawBytes).readUInt32LE(0);
-  if (fieldsNumber > rawBytes.length) {
-    throw new Error('invalid fieldsNumber value');
-  }
+): IResultWithBytes<Schema> {
+  const clTypeParsingSchema = new CLTypeList(
+    new CLTypeTuple2(
+      CLTypeString,
+      new CLTypeDynamic(TypeID.String, CLTypeString),
+    ),
+  );
 
-  let remainder = rawBytes.subarray(4);
+  const clValue = CLValueParser.fromBytesByType(rawBytes, clTypeParsingSchema);
 
-  const schema: Schema = [];
+  const schema: Schema = clValue.result.list!.elements.map(el => ({
+    property: el.tuple2!.inner1.stringVal!.toString(),
+    value: (el.tuple2!.inner2.type as CLTypeDynamic).inner,
+  }));
 
-  for (let i = 0; i < fieldsNumber; i++) {
-    const rawBytesWithRemainder = parseBytesWithRemainder(remainder);
-
-    const fieldName = new TextDecoder().decode(rawBytesWithRemainder.data);
-    remainder = rawBytesWithRemainder.remainder;
-
-    const clTypeWithRemainder = matchBytesToCLType(remainder);
-
-    const clType = clTypeWithRemainder.result.unwrap();
-
-    if (!clTypeWithRemainder.remainder) {
-      throw new Error('remainder is empty');
-    }
-
-    schema.push({
-      property: fieldName,
-      value: clType,
-    });
-
-    remainder = clTypeWithRemainder.remainder;
-  }
-
-  return {
-    data: schema,
-    remainder,
-  };
+  return { result: schema, bytes: clValue.bytes };
 }
 
 export async function fetchContractSchemasBytes(
-  rpcClient: CasperServiceByJsonRPC,
+  rpcClient: RpcClient,
   contractHash: string,
   stateRootHash: string,
 ): Promise<Uint8Array> {
-  const contractData = (
-    await rpcClient.getBlockState(stateRootHash, `hash-${contractHash}`, [])
-  ).Contract;
+  const contractData = await rpcClient.getStateItem(
+    stateRootHash,
+    `hash-${contractHash}`,
+    [],
+  );
 
-  if (!contractData) {
+  if (!contractData || !contractData.storedValue.contract) {
     throw new Error('contract data not found');
   }
 
-  const eventsSchema = contractData.namedKeys.find(
+  const eventsSchema = contractData.storedValue.contract.namedKeys.keys.find(
     el => el.name === EVENTS_SCHEMA_NAMED_KEY,
   );
   if (!eventsSchema) {
@@ -101,14 +95,15 @@ export async function fetchContractSchemasBytes(
     );
   }
 
-  const schemaResponse = await rpcClient['client'].request({
-    method: 'state_get_item',
-    params: {
-      state_root_hash: stateRootHash,
-      key: eventsSchema.key,
-      path: [],
-    },
-  });
+  const schemaResponse = await rpcClient.getStateItem(
+    stateRootHash,
+    eventsSchema.key.toString(),
+    [],
+  );
 
-  return decodeBase16(schemaResponse.stored_value.CLValue.bytes);
+  if (!schemaResponse.storedValue.clValue) {
+    throw new Error('no CLValue for schema');
+  }
+
+  return schemaResponse.storedValue.clValue.bytes();
 }
