@@ -39,7 +39,7 @@
     "ts-results": "^3.3.0"
   },
   "peerDependencies": {
-    "casper-js-sdk": "^5.0.12-beta2"
+    "casper-js-sdk": "^5.0.14-beta2"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
