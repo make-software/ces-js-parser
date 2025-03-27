@@ -1,6 +1,6 @@
 {
   "name": "@make-software/ces-js-parser",
-  "version": "2.0.1-beta1",
+  "version": "2.0.0",
   "description": "Parser for contract-level events encoded with Casper Event Standard (CES)",
   "main": "dist/lib.node.js",
   "types": "dist/index.d.ts",
@@ -39,7 +39,7 @@
     "ts-results": "^3.3.0"
   },
   "peerDependencies": {
-    "casper-js-sdk": "^5.0.14-beta2"
+    "casper-js-sdk": "^5"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
@@ -47,7 +47,7 @@
     "@typescript-eslint/parser": "^5.53.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
-    "casper-js-sdk": "^5.0.12-beta2",
+    "casper-js-sdk": "^5",
     "copy-webpack-plugin": "^11.0.0",
     "crypto-browserify": "^3.12.0",
     "eslint": "^8.34.0",
