@@ -15,7 +15,7 @@ The library is built on top of the [casper-js-sdk](https://github.com/casper-eco
 
 ## Usage
 
-Here is an example of parsing CES events using `ces-js-parser` from a real Testnet deploy loaded with `casper-js-sdk`:
+Here is an example of parsing CES events using `ces-js-parser` from a real Integration net transaction loaded with `casper-js-sdk`:
 
 ```typescript
 import { HttpHandler, RpcClient } from 'casper-js-sdk';
@@ -26,16 +26,16 @@ import { Parser } from '@make-software/ces-js-parser';
 
   const rpcClient = new RpcClient(rpcHandler);
 
-  const transaction = await rpcClient.getTransactionByDeployHash(
-          'c1bb9ae27877f5ecf4ef71307e7ee3c403bcace065565c3645b81ec0a9bc8978'
-  );
-
   const parser = await Parser.create(rpcClient, [
-    '0640eb43bd95d5c88b799862bc9fb42d7a241f1a8aae5deaa03170a27ee8eeaa'
+    '333f0e776995a27ad8502e29b141b875951f92fe6b61329a59f1f875ef48e16a'
   ]);
 
+  const transaction = await rpcClient.getTransactionByTransactionHash(
+    '1592814db95151bb9366112dea6e10fe5d8043ba2b1efd28545a0b6e53839a70'
+  );
+
   const events = parser.parseExecutionResult(
-          deploy.execution_results[0].result as ExecutionResult
+    transaction.executionInfo!.executionResult,
   );
 
   events.forEach(console.log);
