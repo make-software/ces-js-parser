@@ -138,7 +138,9 @@ export class Parser {
 
     const results: ParseResult[] = [];
 
-    for (const transform of executionResult.effects) {
+    for (let i = 0; i < executionResult.effects.length; i++) {
+      const transform = executionResult.effects[i];
+
       if (!transform.key.dictionary) {
         continue;
       }
@@ -168,6 +170,7 @@ export class Parser {
         contractPackageHash: null,
         name: eventNameWithRemainder.result,
         eventId: parseInt(dictionary.key),
+        transformIdx: i,
         data: {},
       };
 

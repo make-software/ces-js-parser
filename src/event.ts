@@ -16,6 +16,7 @@ export interface Event {
   contractHash: Hash | null;
   contractPackageHash: Hash | null;
   eventId: number;
+  transformIdx: number;
   data: Record<string, CLValue>;
 }
 
