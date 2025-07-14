@@ -62,6 +62,8 @@ describe('Parser', () => {
       expect(events[0].event!.name).toEqual('BallotCast');
       expect(events[0].event!.contractHash).toEqual(contractHash);
       expect(events[0].event!.contractPackageHash).toEqual(contractPackageHash);
+      expect(events[0].event!.eventId).toEqual(2);
+      expect(events[0].event!.transformIdx).toEqual(99);
 
       expect(Object.keys(events[0].event!.data!).length).toEqual(5);
 
@@ -75,6 +77,8 @@ describe('Parser', () => {
       expect(events[1].event!.name).toEqual('SimpleVotingCreated');
       expect(events[1].event!.contractHash).toEqual(contractHash);
       expect(events[1].event!.contractPackageHash).toEqual(contractPackageHash);
+      expect(events[1].event!.eventId).toEqual(3);
+      expect(events[1].event!.transformIdx).toEqual(115);
 
       expect(Object.keys(events[1].event!.data!).length).toEqual(12);
 
