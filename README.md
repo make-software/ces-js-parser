@@ -146,12 +146,14 @@ const event = parseEventNameAndData(rawEvent, schemas);
 
 Type that represents an event:
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `contractHash` | `Uint8Array` | Event ContractHash |
-| `contractPackageHash` | `Uint8Array` | Event ContractHash |
-| `name` | `string` | Event name |
-| `data` | `Record<string,CLValue>` | Event Data |
+| Property | Type                     | Description                                         |
+| --- |--------------------------|-----------------------------------------------------|
+| `contractHash` | `Uint8Array`             | Event ContractHash                                  |
+| `contractPackageHash` | `Uint8Array`             | Event ContractHash                                  |
+| `name` | `string`                 | Event name                                          |
+| `eventId` | `number`                 | Event identifier                                    |
+| `transformIdx` | `number`                 | Transaction transform index of the event |
+| `data` | `Record<string,CLValue>` | Event Data                                          |
 
 ### `ParseResult`
 
